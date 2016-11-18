@@ -31,7 +31,4 @@ write!(worksheet, 3, 4, Url("http://localhost"))
 write!(worksheet, 3, 5, "=3 + 4")
 
 
-# Insert an image.
-#insert_image!(worksheet, 'B5', 'logo.png')
-
 close_workbook(workbook)
