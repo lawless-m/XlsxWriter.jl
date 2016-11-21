@@ -20,7 +20,7 @@ date_format = add_format!(workbook, Dict("num_format"=>"d mmmm yyyy"))
 write!(worksheet, "A1", "Hello")
 
 # Text with formatting.
-write!(worksheet, "A2", "World", bold)
+write!(worksheet, 1,1, "World", bold)
 
 # Write some numbers, with row/column notation.
 write!(worksheet, 2, 2, 123)
