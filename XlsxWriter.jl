@@ -101,9 +101,15 @@ set_column!(ws::Worksheet, cols::AbstractString, width::Real, fmt::MaybeFormat=n
 set_column!(ws::Worksheet, first_col::Int64, last_col::Int64, width::Real, options::Dict=Dict()) = ws.py[:set_column](first_col, last_col, width, options)
 set_column!(ws::Worksheet, cols::AbstractString, width::Real, options::Dict=Dict()) = ws.py[:set_column](cols, width, options)
 
-set_row!(ws::Worksheet, row::Int64, height::Real, fmt::MaybeFormat=nothing, options::Dict=Dict()) = ws.py[:set_row](row, height, @Fmt, options)
-set_row!(ws::Worksheet, row::Int64, height::Real, options::Dict=Dict()) = ws.py[:set_row](row, height, options)
+set_row!(ws::Worksheet, row::Int64, height::Real, fmt::Format, options::Dict) = ws.py[:set_row](row, height, @Fmt, options)
 
+set_row!(ws::Worksheet, row::Int64, height::Real, fmt::Format) = ws.py[:set_row](row, height, @Fmt)
+
+set_row!(ws::Worksheet, row::Int64, height::Real) = ws.py[:set_row](row, height)
+
+set_row!(ws::Worksheet, row::Int64, fmt::Format, options::Dict=Dict()) = ws.py[:set_row](row, nothing, @Fmt, options)
+
+set_row!(ws::Worksheet, row::Int64, options::Dict) = ws.py[:set_row](row, nothing, nothing, options)
 
 
 # write_string / write_formula
@@ -154,11 +160,11 @@ function write_matrix!(ws::Worksheet, row::Int64, col::Int64, data::Matrix, fmt:
 	ce = size(data, 2)-1
 	if re > ce
 		for c in 0:ce
-			write_column!(ws, row, col+c, squeeze(data[:, c+1], 1), fmt)
+			write_column!(ws, row, col+c, vec(data[:, c+1]), fmt)
 		end
 	else
 		for r in 0:re
-			write_row!(ws, row+r, col, squeeze(data[r+1, :], 1), fmt)
+			write_row!(ws, row+r, col, vec(data[r+1, :]), fmt)
 		end
 	end
 end
@@ -179,20 +185,20 @@ function write_array_formula!(ws::Worksheet, first_cell::AbstractString, last_ce
 	ws.py[:write_array_formula](first_cell, last_cell, formula, @Fmt)
 end
 
-function write_row!(ws::Worksheet, row::Int64, col::Int64, data::Vector, fmt::MaybeFormat=nothing)
-	ws.py[:write_row](row, col, data, @Fmt)
+function write_row!(ws::Worksheet, row::Int64, col::Int64, data::Array, fmt::MaybeFormat=nothing)
+	ws.py[:write_row](row, col, vec(data), @Fmt)
 end
 
-function write_row!(ws::Worksheet, cell::AbstractString, data::Vector, fmt::MaybeFormat=nothing)
-	ws.py[:write_row](cell, data)
+function write_row!(ws::Worksheet, cell::AbstractString, data::Array, fmt::MaybeFormat=nothing)
+	ws.py[:write_row](cell, vec(data))
 end
 
-function write_column!(ws::Worksheet, row::Int64, col::Int64, data::Vector, fmt::MaybeFormat=nothing)
-	ws.py[:write_column](row, col, data, @Fmt)
+function write_column!(ws::Worksheet, row::Int64, col::Int64, data::Array, fmt::MaybeFormat=nothing)
+	ws.py[:write_column](row, col, vec(data), @Fmt)
 end
 
-function write_row!(ws::Worksheet, cell::AbstractString, data::Vector, fmt::MaybeFormat=nothing)
-	ws.py[:write_column](cell, data, @Fmt)
+function write_row!(ws::Worksheet, cell::AbstractString, data::Array, fmt::MaybeFormat=nothing)
+	ws.py[:write_column](cell, vec(data), @Fmt)
 end
 
 function write_rich_string!(ws::Worksheet, row::Int64, col::Int64, parts...)
@@ -235,11 +241,11 @@ add_table!(ws::Worksheet, first_cell::AbstractString, last_cell::AbstractString,
 add_sparkline!(ws::Worksheet, row::Int64, col::Int64, options::Dict) = ws.py[:add_sparkline](row, col, options)
 add_sparkline!(ws::Worksheet, cell::AbstractString, options::Dict) = ws.py[:add_sparkline](cell, options)
 
-insert_image!(ws::Worksheet, row::Int64, col:Int64, image::AbstractString, options::Dict=Dict()) = ws.py[:insert_image](row, col, image, options)
+insert_image!(ws::Worksheet, row::Int64, col::Int64, image::AbstractString, options::Dict=Dict()) = ws.py[:insert_image](row, col, image, options)
 insert_image!(ws::Worksheet, cell::AbstractString, image::AbstractString, options::Dict=Dict()) = ws.py[:insert_image](cell, image, options)
 
-insert_chart!(ws::Worksheet, row::Int64, col::Int64, ch::Chart, options::Dict=Dict() = ws.py[:insert_chart](row, col, ch, options)
-insert_chart!(ws::Worksheet, cell::AbstractString, ch::Chart, options::Dict=Dict() = ws.py[:insert_chart](cell, ch, options)
+insert_chart!(ws::Worksheet, row::Int64, col::Int64, ch::Chart, options::Dict=Dict()) = ws.py[:insert_chart](row, col, ch, options)
+insert_chart!(ws::Worksheet, cell::AbstractString, ch::Chart, options::Dict=Dict()) = ws.py[:insert_chart](cell, ch, options)
 
 insert_textbox!(ws::Worksheet, row::Int64, col::Int64, text::AbstractString, options::Dict=Dict()) = ws.py[:insert_textbox](row, col, text, options)
 insert_textbox!(ws::Worksheet, cell::AbstractString, text::AbstractString, options::Dict=Dict()) = ws.py[:insert_textbox](cell, text, options)
@@ -259,8 +265,8 @@ autofilter!(ws::Worksheet, cells::AbstractString) = ws.py[:autofilter](cells)
 filter_column!(ws::Worksheet, col::Int64, criteria::AbstractString) = ws.py[:filter_column](col, criteria)
 filter_column!(ws::Worksheet, col::AbstractString, criteria::AbstractString) = ws.py[:filter_column](col, criteria)
 
-filter_column_list!(ws::Worksheet, col::Int64, criteria::Vector{AbstractString}) = ws.py[:filter_column](col, criteria)
-filter_column!(ws::Worksheet, col::AbstractString, criteria::Vector{AbstractString}) = ws.py[:filter_column](col, criteria)
+filter_column_list!(ws::Worksheet, col::Int64, criteria::Array{AbstractString}) = ws.py[:filter_column](col, vec(criteria))
+filter_column!(ws::Worksheet, col::AbstractString, criteria::Array{AbstractString}) = ws.py[:filter_column](col, vec(criteria))
 
 set_selection!(ws::Worksheet, first_row::Int64, first_col::Int64, last_row::Int64, last_col::Int64) = ws.py[:set_selection](first_row, first_col, last_row, last_col)
 set_selection!(ws::Worksheet, cells::AbstractString) = ws.py[:set_selection](cells)
