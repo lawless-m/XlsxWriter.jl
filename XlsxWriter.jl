@@ -64,7 +64,7 @@ function cell2rc(cell::AbstractString)
 		col += 1 + Int(cell[1]-'A') 
 		cell = cell[2:end]
 	end
-	col-1, parse(Int, cell)-1
+	parse(Int, cell)-1, col-1
 end
 
 workbook(fn::AbstractString) = Workbook(xlsxwriter.Workbook(fn))
@@ -206,8 +206,14 @@ function write_array_formula!(ws::Worksheet, first_cell::AbstractString, last_ce
 	ws.py[:write_array_formula](cell2rc(first_cell)..., cell2rc(last_cell)..., formula, @Fmt)
 end
 
-function write_array_formula!(ws::Worksheet, first_cell::AbstractString, formula::AbstractString, fmt::MaybeFormat=nothing)
-	ws.py[:write_array_formula](cell2rc(first_cell)..., cell2rc(first_cell)..., formula, @Fmt)
+function write_array_formula!(ws::Worksheet, cell::AbstractString, formula::AbstractString, fmt::MaybeFormat=nothing)
+	if search(cell, ':') > 0
+		first, last = split(cell, ':')
+	else
+		first = last = cell
+	end
+	
+	ws.py[:write_array_formula](cell2rc(first)..., cell2rc(last)..., formula, @Fmt)
 end
 
 

@@ -34,6 +34,6 @@ write_array_formula!(ws, "A2", "{=SUM(B1:C1*B2:C2)}")
 # 9500 in A2
 
 # Write an array formula that returns a range of values
-#write_array_formula!(ws, 5, 0, 7, 0, "{=TREND(C5:C7,B5:B7)}")
+write_array_formula!(ws, "A5:A7", "{=TREND(C5:C7,B5:B7)}")
 
 close(wb)
