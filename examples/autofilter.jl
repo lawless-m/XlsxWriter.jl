@@ -58,17 +58,14 @@ filter_column!(sheet[2], 0, "Region == East")
 
 for r in 1:size(data, 1)
     # Check for rows that match the filter.
-    if data[r,:][1] != "East"
+    if data[r,1] != "East"
         set_row!(sheet[2], r, Dict("hidden"=>"1"))
 	end
 	write_row!(sheet[2], r, 0, data[r,:])
 end
 
 ###############################################################################
-#
-#
 # Example 3. Autofilter with a dual filter condition in one of the columns.
-#
 
 # Set the autofilter.
 autofilter!(sheet[3], "A1:D51")
@@ -77,114 +74,73 @@ autofilter!(sheet[3], "A1:D51")
 filter_column!(sheet[3], "A", "x == East or x == South")
 
 # Hide the rows that don't match the filter criteria.
-row = 1
 for r in 1:size(data, 1)
     # Check for rows that match the filter.
-    if data[r,:][1] != "East" && data[r,:][1] != "South"
+    if data[r,1] != "East" && data[r,1] != "South"
         set_row!(sheet[3], r, Dict("hidden"=>true))
 	end
 	write_row!(sheet[3], r, 0, data[r,:])
 end
 
-#=
+
 ###############################################################################
-#
-#
 # Example 4. Autofilter with filter conditions in two columns.
-#
 
 # Set the autofilter.
-worksheet4.autofilter('A1:D51')
+autofilter!(sheet[4], "A1:D51")
 
 # Add filter criteria.
-worksheet4.filter_column('A', 'x == East')
-worksheet4.filter_column('C', 'x > 3000 and x < 8000')
+filter_column!(sheet[4], "A", "x == East")
+filter_column!(sheet[4], "C", "x > 3000 and x < 8000")
 
 # Hide the rows that don't match the filter criteria.
-row = 1
-for row_data in (data):
-    region = row_data[0]
-    volume = int(row_data[2])
-
-    # Check for rows that match the filter.
-    if region == 'East' and volume > 3000 and volume < 8000:
-        # Row matches the filter, no further action required.
-        pass
-    else:
-        # We need to hide rows that don't match the filter.
-        worksheet4.set_row(row, options={'hidden': True})
-
-    worksheet4.write_row(row, 0, row_data)
-
-    # Move on to the next worksheet row.
-    row += 1
+for r in 1:size(data, 1)
+    # Hide rows that don't match the filter.
+    if !(data[r,1] == "East" && data[r,3] > 3000 && data[r,3] < 8000)
+		set_row!(sheet[4], r, Dict("hidden"=>true))
+	end
+    write_row!(sheet[4], r, 0, data[r,:])
+end
 
 
 ###############################################################################
-#
-#
 # Example 5. Autofilter with filter for blanks.
-#
 # Create a blank cell in our test data.
 
 # Set the autofilter.
-worksheet5.autofilter('A1:D51')
+autofilter!(sheet[5], "A1:D51")
 
 # Add filter criteria.
-worksheet5.filter_column('A', 'x == Blanks')
+filter_column!(sheet[5], "A", "x == Blanks")
 
 # Simulate a blank cell in the data.
-data[5][0] = ''
+data[5, 1] = ""
 
-# Hide the rows that don't match the filter criteria.
-row = 1
-for row_data in (data):
-    region = row_data[0]
-
+for r in 1:size(data, 1)
     # Check for rows that match the filter.
-    if region == '':
+    if data[r,1] != ""
         # Row matches the filter, no further action required.
-        pass
-    else:
-        # We need to hide rows that don't match the filter.
-        worksheet5.set_row(row, options={'hidden': True})
-
-    worksheet5.write_row(row, 0, row_data)
-
-    # Move on to the next worksheet row.
-    row += 1
-
+        set_row!(sheet[5], r, Dict("hidden"=>true))
+	end
+    write_row!(sheet[5], r, 0, data[r,:])
+end
 
 ###############################################################################
-#
-#
 # Example 6. Autofilter with filter for non-blanks.
-#
-
 # Set the autofilter.
-worksheet6.autofilter('A1:D51')
+autofilter!(sheet[6], "A1:D51")
 
 # Add filter criteria.
-worksheet6.filter_column('A', 'x == NonBlanks')
+filter_column!(sheet[6], "A", "x == NonBlanks")
 
-# Hide the rows that don't match the filter criteria.
-row = 1
-for row_data in (data):
-    region = row_data[0]
-
+for r in 1:size(data, 1)
     # Check for rows that match the filter.
-    if region != '':
+    if data[r,1] == ""
         # Row matches the filter, no further action required.
-        pass
-    else:
-        # We need to hide rows that don't match the filter.
-        worksheet6.set_row(row, options={'hidden': True})
-
-    worksheet6.write_row(row, 0, row_data)
-
-    # Move on to the next worksheet row.
-    row += 1
-=#
+        set_row!(sheet[6], r, Dict("hidden"=>true))
+	end
+    write_row!(sheet[6], r, 0, data[r,:])
+end
 
 close(wb)
 

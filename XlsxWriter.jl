@@ -102,13 +102,9 @@ set_column!(ws::Worksheet, first_col::Int64, last_col::Int64, width::Real, optio
 set_column!(ws::Worksheet, cols::AbstractString, width::Real, options::Dict=Dict()) = ws.py[:set_column](cols, width, options)
 
 set_row!(ws::Worksheet, row::Int64, height::Real, fmt::Format, options::Dict) = ws.py[:set_row](row, height, @Fmt, options)
-
 set_row!(ws::Worksheet, row::Int64, height::Real, fmt::Format) = ws.py[:set_row](row, height, @Fmt)
-
 set_row!(ws::Worksheet, row::Int64, height::Real) = ws.py[:set_row](row, height)
-
 set_row!(ws::Worksheet, row::Int64, fmt::Format, options::Dict=Dict()) = ws.py[:set_row](row, nothing, @Fmt, options)
-
 set_row!(ws::Worksheet, row::Int64, options::Dict) = ws.py[:set_row](row, nothing, nothing, options)
 
 
