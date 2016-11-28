@@ -57,6 +57,16 @@ function rc2cell(row::Int64, col::Int64)
 	cell
 end
 
+function cell2rc(cell::AbstractString)
+	col = 0
+	while length(cell) > 0 && cell[1]>='A'
+		col *= 26
+		col += 1 + Int(cell[1]-'A') 
+		cell = cell[2:end]
+	end
+	col-1, parse(Int, cell)-1
+end
+
 workbook(fn::AbstractString) = Workbook(xlsxwriter.Workbook(fn))
 
 # Workbook
@@ -111,44 +121,44 @@ set_row!(ws::Worksheet, row::Int64, options::Dict) = ws.py[:set_row](row, nothin
 # write_string / write_formula
 
 
-function write!(ws::Worksheet, row::Int64, col::Int64, data::AbstractString, fmt::MaybeFormat=nothing)
-	write!(ws, rc2cell(row, col), data, fmt)
+function write!(ws::Worksheet, cell::AbstractString, data, fmt::MaybeFormat=nothing)
+	write!(ws, cell2rc(cell)..., data, fmt)
 end
 
-function write!(ws::Worksheet, cell::AbstractString, data::AbstractString, fmt::MaybeFormat=nothing)
+function write!(ws::Worksheet, row::Int64, col::Int64, data::AbstractString, fmt::MaybeFormat=nothing)
 	if length(data) > 0
 		if data[1] == '=' || (data[1:2] == "{=" && data[end] == '}')
-			write!(ws, cell, :write_formula, data, fmt)
+			write!(ws, row, col, :write_formula, data, fmt)
 		else
-			write!(ws, cell, :write_string, data, fmt)
+			write!(ws, row, col, :write_string, data, fmt)
 		end
 	else
-		write!(ws, cell, :write_blank, data, fmt)
+		write!(ws, row, col, :write_blank, data, fmt)
 	end
 end
 #write_formula! = write!
 
-function write!(ws::Worksheet, cell::AbstractString, fn::Symbol, data::Data, fmt::MaybeFormat=nothing)
-	ws.py[fn](cell, data, @Fmt)
+function write!(ws::Worksheet, row::Int64, col::Int64, fn::Symbol, data::Data, fmt::MaybeFormat=nothing)
+	ws.py[fn](row, col, data, @Fmt)
 end
 
 # convert r,c into cell format
-write!(ws::Worksheet, row::Int64, col::Int64, data, fmt::MaybeFormat=nothing) = write!(ws, rc2cell(row, col), data, fmt)
+write!(ws::Worksheet, row::Int64, col::Int64, data, fmt::MaybeFormat=nothing) = write!(ws, row, col, data, fmt)
 write_string! = write!
 
-write!(ws::Worksheet, cell::AbstractString, num::Real, fmt::MaybeFormat=nothing) = write!(ws, cell, :write_number, num, fmt)
+write!(ws::Worksheet, row::Int64, col::Int64, num::Real, fmt::MaybeFormat=nothing) = write!(ws, row, col, :write_number, num, fmt)
 write_number! = write!
 
-write!(ws::Worksheet, cell::AbstractString, fmt::MaybeFormat=nothing) = write!(ws, cell, :write_blank, fmt)
+write!(ws::Worksheet, row::Int64, col::Int64, fmt::MaybeFormat=nothing) = write!(ws, row, col, :write_blank, fmt)
 write_blank! = write!
 
-write!(ws::Worksheet, cell::AbstractString, dt::DateTime, fmt::MaybeFormat=nothing) = write!(ws, cell, :write_datetime, dt, fmt)
+write!(ws::Worksheet, row::Int64, col::Int64, dt::DateTime, fmt::MaybeFormat=nothing) = write!(ws, row, col, :write_datetime, dt, fmt)
 write_datetime! = write!
 
-write!(ws::Worksheet, cell::AbstractString, bool::Bool, fmt::MaybeFormat=nothing) = write!(ws, cell, :write_boolean, bool, fmt)
+write!(ws::Worksheet, row::Int64, col::Int64, bool::Bool, fmt::MaybeFormat=nothing) = write!(ws, row, col, :write_boolean, bool, fmt)
 write_bool! = write!
 
-write!(ws::Worksheet, cell::AbstractString, u::Url, fmt::MaybeFormat=nothing) = write!(ws, cell, :write_url, u.url, fmt)
+write!(ws::Worksheet, row::Int64, col::Int64, u::Url, fmt::MaybeFormat=nothing) = write!(ws, row, col, :write_url, u.url, fmt)
 write_url! = write!
 
 function write_matrix!(ws::Worksheet, row::Int64, col::Int64, data::Matrix, fmt::MaybeFormat=nothing)
@@ -165,28 +175,48 @@ function write_matrix!(ws::Worksheet, row::Int64, col::Int64, data::Matrix, fmt:
 	end
 end
 
-function write_formula!(ws::Worksheet, row::Int64, col::Int64, formula::AbstractString, fmt::MaybeFormat=nothing; result::MaybeData=nothing)
+function write_formula!(ws::Worksheet, row::Int64, col::Int64, formula::AbstractString, fmt::MaybeFormat=nothing; result::Data=0)
 	ws.py[:write_formula](row, col, formula, @Fmt, result)
 end
 
-function write_formula!(ws::Worksheet, cell::AbstractString, formula::AbstractString, fmt::MaybeFormat=nothing; result::MaybeData=nothing)
-	ws.py[:write_formula](cell, formula, @Fmt, result)
+function write_formula!(ws::Worksheet, cell::AbstractString, formula::AbstractString, fmt::MaybeFormat=nothing; result::Data=0)
+	ws.py[:write_formula](cell2rc(cell)..., formula, @Fmt, result)
 end
+
+function write_formula!(ws::Worksheet, row::Int64, col::Int64, formula::AbstractString, result::Data=0)
+	ws.py[:write_formula](row, col, formula, nothing, result)
+end
+
+function write_formula!(ws::Worksheet, cell::AbstractString, formula::AbstractString, result::Data=0)
+	ws.py[:write_formula](cell2rc(cell)..., formula, nothing, result)
+end
+
+
+
 
 function write_array_formula!(ws::Worksheet, first_row::Int64, first_col::Int64, last_row::Int64, last_col::Int64, formula::AbstractString, fmt::MaybeFormat=nothing)
 	ws.py[:write_array_formula](first_row, first_col, last_row, last_col, formula, @Fmt)
 end
 
-function write_array_formula!(ws::Worksheet, first_cell::AbstractString, last_cell::Int64, last_col::Int64, formula::AbstractString, fmt::MaybeFormat=nothing)
-	ws.py[:write_array_formula](first_cell, last_cell, formula, @Fmt)
+function write_array_formula!(ws::Worksheet, first_row::Int64, first_col::Int64, formula::AbstractString, fmt::MaybeFormat=nothing)
+	ws.py[:write_array_formula](first_row, first_col, first_row, first_col, formula, @Fmt)
 end
+
+function write_array_formula!(ws::Worksheet, first_cell::AbstractString, last_cell::AbstractString, formula::AbstractString, fmt::MaybeFormat=nothing)
+	ws.py[:write_array_formula](cell2rc(first_cell)..., cell2rc(last_cell)..., formula, @Fmt)
+end
+
+function write_array_formula!(ws::Worksheet, first_cell::AbstractString, formula::AbstractString, fmt::MaybeFormat=nothing)
+	ws.py[:write_array_formula](cell2rc(first_cell)..., cell2rc(first_cell)..., formula, @Fmt)
+end
+
 
 function write_row!(ws::Worksheet, row::Int64, col::Int64, data::Array, fmt::MaybeFormat=nothing)
 	ws.py[:write_row](row, col, vec(data), @Fmt)
 end
 
 function write_row!(ws::Worksheet, cell::AbstractString, data::Array, fmt::MaybeFormat=nothing)
-	ws.py[:write_row](cell, vec(data))
+	ws.py[:write_row](cell2rc(cell)..., vec(data))
 end
 
 function write_column!(ws::Worksheet, row::Int64, col::Int64, data::Array, fmt::MaybeFormat=nothing)
@@ -194,7 +224,7 @@ function write_column!(ws::Worksheet, row::Int64, col::Int64, data::Array, fmt::
 end
 
 function write_row!(ws::Worksheet, cell::AbstractString, data::Array, fmt::MaybeFormat=nothing)
-	ws.py[:write_column](cell, vec(data), @Fmt)
+	ws.py[:write_column](cell2rc(cell)..., vec(data), @Fmt)
 end
 
 function write_rich_string!(ws::Worksheet, row::Int64, col::Int64, parts...)
@@ -205,7 +235,7 @@ end
 function write_rich_string!(ws::Worksheet, cell::AbstractString, parts...)
 	unwrap(f::Format) = f.py
 	unwrap(a) = a
-	ws.py[:write_rich_string](cell, [unwrap(p) for p in parts]...)
+	ws.py[:write_rich_string](cell2rc(cell)..., [unwrap(p) for p in parts]...)
 end
 
 set_first_sheet!(ws::Worksheet) = ws.py[:set_first_sheet]()
@@ -217,7 +247,7 @@ merge_range!(ws::Worksheet, first_row::Int64, first_col::Int64, last_row::Int64,
 merge_range!(ws::Worksheet, first_row::Int64, first_col::Int64, last_row::Int64, last_col::Int64, contents, fmt::Void) = ws.py[:merge_range](first_row, first_col, last_row, last_col, contents)
 
 freeze_panes!(ws::Worksheet, row::Int64, col::Int64) = ws.py[:freeze_panes](row, col)
-freeze_panes!(ws::Worksheet, cell::AbstractString) = ws.py[:freeze_panes](cell)
+freeze_panes!(ws::Worksheet, cell::AbstractString) = ws.py[:freeze_panes](cell2rc(cell)...)
 freeze_panes!(ws::Worksheet, row::Int64, col::Int64, top_row::Int64) = ws.py[:freeze_panes](row, col, top_row)
 freeze_panes!(ws::Worksheet, row::Int64, col::Int64, top_row::Int64, left_col::Int64) = ws.py[:freeze_panes](row, col, top_row, left_col)
 
@@ -226,31 +256,31 @@ split_panes!(ws::Worksheet,x::Int64, y::Int64, top_row::Int64) = ws.py[:split_pa
 split_panes!(ws::Worksheet,x::Int64, y::Int64, top_row::Int64, left_col::Int64) = ws.py[:split_panes](x, y, top_row, left_col)
 
 data_validation!(ws::Worksheet, first_row::Int64, first_col::Int64, last_row::Int64, last_col::Int64, options::Dict) = ws.py[:data_validation](first_row, first_col, last_row, last_col, options)
-data_validation!(ws::Worksheet, first_cell::AbstractString, last_cell::AbstractString, options::Dict) = ws.py[:data_validation](first_cell, last_cell, options)
+data_validation!(ws::Worksheet, first_cell::AbstractString, last_cell::AbstractString, options::Dict) = ws.py[:data_validation](cell2rc(first_cell)..., cell2rc(last_cell)..., options)
 
 conditional_format!(ws::Worksheet, first_row::Int64, first_col::Int64, last_row::Int64, last_col::Int64, options::Dict) = ws.py[:data_validation](first_row, first_col, last_row, last_col, options)
-conditional_format!(ws::Worksheet, first_cell::AbstractString, last_cell::AbstractString, options::Dict) = ws.py[:data_validation](first_cell, last_cell, options)
+conditional_format!(ws::Worksheet, first_cell::AbstractString, last_cell::AbstractString, options::Dict) = ws.py[:data_validation](cell2rc(first_cell)..., cell2rc(last_cell)..., options)
 
 add_table!(ws::Worksheet, first_row::Int64, first_col::Int64, last_row::Int64, last_col::Int64, options::Dict) = ws.py[:data_validation](first_row, first_col, last_row, last_col, options)
-add_table!(ws::Worksheet, first_cell::AbstractString, last_cell::AbstractString, options::Dict) = ws.py[:data_validation](first_cell, last_cell, options)
+add_table!(ws::Worksheet, first_cell::AbstractString, last_cell::AbstractString, options::Dict) = ws.py[:data_validation](cell2rc(first_cell), cell2rc(last_cell), options)
 
 add_sparkline!(ws::Worksheet, row::Int64, col::Int64, options::Dict) = ws.py[:add_sparkline](row, col, options)
-add_sparkline!(ws::Worksheet, cell::AbstractString, options::Dict) = ws.py[:add_sparkline](cell, options)
+add_sparkline!(ws::Worksheet, cell::AbstractString, options::Dict) = ws.py[:add_sparkline](cell2rc(cell)..., options)
 
 insert_image!(ws::Worksheet, row::Int64, col::Int64, image::AbstractString, options::Dict=Dict()) = ws.py[:insert_image](row, col, image, options)
-insert_image!(ws::Worksheet, cell::AbstractString, image::AbstractString, options::Dict=Dict()) = ws.py[:insert_image](cell, image, options)
+insert_image!(ws::Worksheet, cell::AbstractString, image::AbstractString, options::Dict=Dict()) = ws.py[:insert_image](cell2rc(cell)..., image, options)
 
 insert_chart!(ws::Worksheet, row::Int64, col::Int64, ch::Chart, options::Dict=Dict()) = ws.py[:insert_chart](row, col, ch, options)
-insert_chart!(ws::Worksheet, cell::AbstractString, ch::Chart, options::Dict=Dict()) = ws.py[:insert_chart](cell, ch, options)
+insert_chart!(ws::Worksheet, cell::AbstractString, ch::Chart, options::Dict=Dict()) = ws.py[:insert_chart](cell2rc(cell)..., ch, options)
 
 insert_textbox!(ws::Worksheet, row::Int64, col::Int64, text::AbstractString, options::Dict=Dict()) = ws.py[:insert_textbox](row, col, text, options)
-insert_textbox!(ws::Worksheet, cell::AbstractString, text::AbstractString, options::Dict=Dict()) = ws.py[:insert_textbox](cell, text, options)
+insert_textbox!(ws::Worksheet, cell::AbstractString, text::AbstractString, options::Dict=Dict()) = ws.py[:insert_textbox](cell2rc(cell)..., text, options)
 
 insert_button!(ws::Worksheet, row::Int64, col::Int64, options::Dict) = wb.py[:insert_button](row, col, options)
-insert_button!(ws::Worksheet, cell::AbstractString, options::Dict) = wb.py[:insert_button](cell, options)
+insert_button!(ws::Worksheet, cell::AbstractString, options::Dict) = wb.py[:insert_button](cell2rc(cell)..., options)
 
 write_comment!(ws::Worksheet, row::Int64, col::Int64, comment::AbstractString, options::Dict=Dict()) = ws.py[:write_comment](row, col, comment, options)
-write_comment!(ws::Worksheet, cell::AbstractString, comment::AbstractString, options::Dict=Dict()) = ws.py[:write_comment](cell, comment, options)
+write_comment!(ws::Worksheet, cell::AbstractString, comment::AbstractString, options::Dict=Dict()) = ws.py[:write_comment](cell2rc(cell)..., comment, options)
 
 show_comments!(ws::Worksheet) = ws.py[:show_comments]()
 set_comments_author!(ws::Worksheet, author::AbstractString) = ws.py[:set_comments_author](author)
