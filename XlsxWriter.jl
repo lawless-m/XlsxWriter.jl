@@ -229,7 +229,7 @@ function write_column!(ws::Worksheet, row::Int64, col::Int64, data::Array, fmt::
 	ws.py[:write_column](row, col, vec(data), @Fmt)
 end
 
-function write_row!(ws::Worksheet, cell::AbstractString, data::Array, fmt::MaybeFormat=nothing)
+function write_column!(ws::Worksheet, cell::AbstractString, data::Array, fmt::MaybeFormat=nothing)
 	ws.py[:write_column](cell2rc(cell)..., vec(data), @Fmt)
 end
 
@@ -276,8 +276,8 @@ add_sparkline!(ws::Worksheet, cell::AbstractString, options::Dict) = ws.py[:add_
 insert_image!(ws::Worksheet, row::Int64, col::Int64, image::AbstractString, options::Dict=Dict()) = ws.py[:insert_image](row, col, image, options)
 insert_image!(ws::Worksheet, cell::AbstractString, image::AbstractString, options::Dict=Dict()) = ws.py[:insert_image](cell2rc(cell)..., image, options)
 
-insert_chart!(ws::Worksheet, row::Int64, col::Int64, ch::Chart, options::Dict=Dict()) = ws.py[:insert_chart](row, col, ch, options)
-insert_chart!(ws::Worksheet, cell::AbstractString, ch::Chart, options::Dict=Dict()) = ws.py[:insert_chart](cell2rc(cell)..., ch, options)
+insert_chart!(ws::Worksheet, row::Int64, col::Int64, ch::Chart, options::Dict=Dict()) = ws.py[:insert_chart](row, col, ch.py, options)
+insert_chart!(ws::Worksheet, cell::AbstractString, ch::Chart, options::Dict=Dict()) = ws.py[:insert_chart](cell2rc(cell)..., ch.py, options)
 
 insert_textbox!(ws::Worksheet, row::Int64, col::Int64, text::AbstractString, options::Dict=Dict()) = ws.py[:insert_textbox](row, col, text, options)
 insert_textbox!(ws::Worksheet, cell::AbstractString, text::AbstractString, options::Dict=Dict()) = ws.py[:insert_textbox](cell2rc(cell)..., text, options)
