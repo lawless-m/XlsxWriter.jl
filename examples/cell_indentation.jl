@@ -1,7 +1,6 @@
 #######################################################################
-#
-# Example of how to use Python and the XlsxWriter module to write
-# simple array formulas.
+# A simple formatting example using XlsxWriter.
+# This program demonstrates the indentation cell format.
 # Original Python Copyright 2013-2016, John McNamara, jmcnamara@cpan.org
 # https://github.com/jmcnamara/XlsxWriter
 
