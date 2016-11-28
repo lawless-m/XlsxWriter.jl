@@ -1,4 +1,4 @@
-include("XlsxWriter.jl")
+include("../XlsxWriter.jl")
 
 using XlsxWriter
 
@@ -53,4 +53,4 @@ add_sparkline!(ws, 10, 5, Dict("range"=>"Sheet1!B11:E11"))
 
 merge_range!(ws, 5, 9, 5, 12, "Merged")
 
-close_workbook(wb)
+close(wb)

@@ -7,7 +7,9 @@
 # simple criteria so that some data is shown and some is hidden.
 #
 # Original Python Copyright 2013-2016, John McNamara, jmcnamara@cpan.org
-# http://xlsxwriter.readthedocs.io/example_autofilter.html
+# https://github.com/jmcnamara/XlsxWriter
+#
+# 
 
 include("../XlsxWriter.jl")
 

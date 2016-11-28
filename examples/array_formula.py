@@ -8,7 +8,7 @@
 import xlsxwriter
 
 # Create a new workbook and add a worksheet
-workbook = xlsxwriter.Workbook('array_formula.xlsx')
+workbook = xlsxwriter.Workbook('array_formula.py.xlsx')
 worksheet = workbook.add_worksheet()
 
 # Write some test data.
