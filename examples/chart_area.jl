@@ -3,7 +3,6 @@
 #
 # Original Python Copyright 2013-2016, John McNamara, jmcnamara@cpan.org
 # https://github.com/jmcnamara/XlsxWriter
-# Copyright 2013-2016, John McNamara, jmcnamara@cpan.org
 
 include("../XlsxWriter.jl")
 
