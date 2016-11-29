@@ -8,7 +8,7 @@ include("../XlsxWriter.jl")
 
 using XlsxWriter
 
-wb = workbook("cell_indentation.xlsx")
+wb = Workbook("cell_indentation.xlsx")
 
 ws = add_worksheet!(wb)
 

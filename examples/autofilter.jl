@@ -15,7 +15,7 @@ include("../XlsxWriter.jl")
 
 using XlsxWriter
 
-wb = workbook("autofilter.xlsx")
+wb = Workbook("autofilter.xlsx")
 
 # Add a worksheet for each autofilter example.
 sheet = Worksheet[]

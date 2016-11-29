@@ -9,7 +9,7 @@ include("../XlsxWriter.jl")
 
 using XlsxWriter
 
-wb = workbook("chart_bar.xlsx")
+wb = Workbook("chart_bar.xlsx")
 
 ws = add_worksheet!(wb)
 
