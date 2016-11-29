@@ -3,7 +3,7 @@ include("../XlsxWriter.jl")
 using XlsxWriter
 
 # Create an new Excel file and add a worksheet.
-wb = workbook("demo.xlsx")
+wb = Workbook("demo.xlsx")
 set_calc_mode!(wb, "manual")
 ws = add_worksheet!(wb)
 

@@ -5,7 +5,7 @@ import Base.close
 using PyCall
 @pyimport xlsxwriter
 
-export Workbook, workbook, add_worksheet!, add_format!, set_properties!, set_custom_property!, set_calc_mode!, set_column!, set_row!, add_chart!, close
+export Workbook, add_worksheet!, add_format!, set_properties!, set_custom_property!, set_calc_mode!, set_column!, set_row!, add_chart!, close
 
 export Chart, add_series!, set_x_axis!, set_y_axis!, set_x2_axis!, set_y2_axis!, combine!, set_size!, set_title!, set_legend!, set_chartarea!, set_plotarea!, set_style!, set_table!, set_up_down_bars!, set_drop_lines!, set_high_low_lines!, set_blanks_as!, show_hidden_data!, set_rotation!, set_hole_size!
 
@@ -24,6 +24,8 @@ end
 
 type Workbook
 	py::PyObject
+	fn::AbstractString
+	Workbook(fn::AbstractString) = new(xlsxwriter.Workbook(fn), fn)
 end
 
 type Worksheet
@@ -66,8 +68,6 @@ function cell2rc(cell::AbstractString)
 	end
 	parse(Int, cell)-1, col-1
 end
-
-workbook(fn::AbstractString) = Workbook(xlsxwriter.Workbook(fn))
 
 # Workbook
 macro WbFn(fn)
