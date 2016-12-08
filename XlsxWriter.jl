@@ -1,5 +1,6 @@
 module XlsxWriter
 
+
 import Base.close
 
 using PyCall
@@ -219,18 +220,22 @@ end
 
 function write_row!(ws::Worksheet, row::Int64, col::Int64, data::Array, fmt::MaybeFormat=nothing)
 	ws.py[:write_row](row, col, vec(data), @Fmt)
+	length(vec(data))
 end
 
 function write_row!(ws::Worksheet, cell::AbstractString, data::Array, fmt::MaybeFormat=nothing)
 	ws.py[:write_row](cell2rc(cell)..., vec(data))
+	length(vec(data))
 end
 
 function write_column!(ws::Worksheet, row::Int64, col::Int64, data::Array, fmt::MaybeFormat=nothing)
 	ws.py[:write_column](row, col, vec(data), @Fmt)
+	length(vec(data))
 end
 
 function write_column!(ws::Worksheet, cell::AbstractString, data::Array, fmt::MaybeFormat=nothing)
 	ws.py[:write_column](cell2rc(cell)..., vec(data), @Fmt)
+	length(vec(data))
 end
 
 function write_rich_string!(ws::Worksheet, row::Int64, col::Int64, parts...)
