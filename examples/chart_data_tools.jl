@@ -6,7 +6,7 @@
 # These include, Trendlines, Data Labels, Error Bars, Drop Lines,
 # High-Low Lines and Up-Down Bars.
 #
-# Original Python Copyright 2013-2016, John McNamara, jmcnamara@ org
+# Original Python Copyright 2013-2016, John McNamara, jmcnamara@cpan.org
 # https://github.com/jmcnamara/XlsxWriter
 #
 

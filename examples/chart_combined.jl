@@ -1,6 +1,6 @@
 ######################################################################
 # An example of a Combined chart in XlsxWriter.
-# Original Python Copyright 2013-2016, John McNamara, jmcnamara@ org
+# Original Python Copyright 2013-2016, John McNamara, jmcnamara@cpan.org
 # https://github.com/jmcnamara/XlsxWriter
 
 include("../XlsxWriter.jl")
