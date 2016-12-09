@@ -15,7 +15,7 @@ include("../XlsxWriter.jl")
 
 using XlsxWriter
 
-wb = Workbook("chart_pattern.xlsx")
+wb = Workbook("chart_pie.xlsx")
 ws = add_worksheet!(wb)
 # Formats used in the workbook.
 bold = add_format!(wb, Dict("bold"=> 1))
@@ -23,8 +23,8 @@ bold = add_format!(wb, Dict("bold"=> 1))
 # Add the worksheet data that the charts will refer to.
 headings = ["Category", "Values"]
 data = [
-    ["Apple", "Cherry", "Pecan"];
-    [60, 30, 10];
+    ["Apple" "Cherry" "Pecan"];
+    [60 30 10];
 ]
 
 write_row!(ws, "A1", headings, bold)
