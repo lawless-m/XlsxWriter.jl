@@ -2,7 +2,7 @@
 #
 # An example of creating Excel Scatter charts with  XlsxWriter.
 #
-# Original Python Copyright 2013-2016, John McNamara, jmcnamara@cpan.rg
+# Original Python Copyright 2013-2016, John McNamara, jmcnamara@cpan.org
 # https://github.com/jmcnamara/XlsxWriter
 
 include("../XlsxWriter.jl")

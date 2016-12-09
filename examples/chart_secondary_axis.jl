@@ -2,7 +2,7 @@
 #
 # An example of creating an Excel Line chart with a secondary axis
 # using XlsxWriter.
-#
+# Original Python Copyright 2013-2016, John McNamara, jmcnamara@cpan.org
 # https://github.com/jmcnamara/XlsxWriter
 
 include("../XlsxWriter.jl")
