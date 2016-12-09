@@ -224,7 +224,7 @@ function write_row!(ws::Worksheet, row::Int64, col::Int64, data::Array, fmt::May
 end
 
 function write_row!(ws::Worksheet, cell::AbstractString, data::Array, fmt::MaybeFormat=nothing)
-	ws.py[:write_row](cell2rc(cell)..., vec(data))
+	ws.py[:write_row](cell2rc(cell)..., vec(data), @Fmt)
 	length(vec(data))
 end
 
