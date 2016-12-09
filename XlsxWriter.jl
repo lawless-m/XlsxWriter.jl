@@ -406,8 +406,8 @@ set_style!(ch::Chart, style_id::Int64) = ch.py[:set_style](style_id)
 set_table!(ch::Chart, options::Dict=Dict()) = @ChOpts :set_table
 set_up_down_bars!(ch::Chart, options::Dict=Dict()) = @ChOpts :set_up_down_bars
 set_drop_lines!(ch::Chart, options::Dict=Dict()) = @ChOpts :set_drop_lines
-set_high_low_lines!(ch::Chart, options::Dict) = @ChOpts :set_high_low_lines
-set_blanks_as!(ch::Chart, option::AbstractString) = @ChOpts :set_blanks_as
+set_high_low_lines!(ch::Chart, options::Dict=Dict()) = @ChOpts :set_high_low_lines
+show_blanks_as!(ch::Chart, option::AbstractString) = ch.py[:show_blanks_as](option)
 show_hidden_data!(ch::Chart) = ch.py[:show_hidden_data]()
 set_rotation!(ch::Chart, angle::Int64) = ch.py[:set_rotation](angle)
 set_hole_size!(ch::Chart, hole::Int64) = ch.py[:set_hole_size](hole)
