@@ -391,21 +391,21 @@ macro ChOpts(fn)
 end
 set_options!(py::PyObject, fn::Symbol, options::Dict) = py[fn](options)
 
-add_series!(ch::Chart, options::Dict) = @ChOpts :add_series
-set_x_axis!(ch::Chart, options::Dict) = @ChOpts :set_x_axis
-set_y_axis!(ch::Chart, options::Dict) = @ChOpts :set_y_axis
-set_x2_axis!(ch::Chart, options::Dict) = @ChOpts :set_x2_axis
-set_y2_axis!(ch::Chart, options::Dict) = @ChOpts :set_y2_axis
+add_series!(ch::Chart, options::Dict=Dict()) = @ChOpts :add_series
+set_x_axis!(ch::Chart, options::Dict=Dict()) = @ChOpts :set_x_axis
+set_y_axis!(ch::Chart, options::Dict=Dict()) = @ChOpts :set_y_axis
+set_x2_axis!(ch::Chart, options::Dict=Dict()) = @ChOpts :set_x2_axis
+set_y2_axis!(ch::Chart, options::Dict=Dict()) = @ChOpts :set_y2_axis
 combine!(ch1::Chart, ch2::Chart) = ch1.py[:combine](ch2.py)
-set_size!(ch::Chart, options::Dict) = @ChOpts :set_size
-set_title!(ch::Chart, options::Dict) = @ChOpts :set_title
-set_legend!(ch::Chart, options::Dict) = @ChOpts :set_legend
-set_chartarea!(ch::Chart, options::Dict) = @ChOpts :set_chartarea
-set_plotarea!(ch::Chart, options::Dict) = @ChOpts :set_plotarea
+set_size!(ch::Chart, options::Dict=Dict()) = @ChOpts :set_size
+set_title!(ch::Chart, options::Dict=Dict()) = @ChOpts :set_title
+set_legend!(ch::Chart, options::Dict=Dict()) = @ChOpts :set_legend
+set_chartarea!(ch::Chart, options::Dict=Dict()) = @ChOpts :set_chartarea
+set_plotarea!(ch::Chart, options::Dict=Dict()) = @ChOpts :set_plotarea
 set_style!(ch::Chart, style_id::Int64) = ch.py[:set_style](style_id)
 set_table!(ch::Chart, options::Dict=Dict()) = @ChOpts :set_table
-set_up_down_bars!(ch::Chart, options::Dict) = @ChOpts :set_up_down_bars
-set_drop_lines!(ch::Chart, options::Dict) = @ChOpts :set_drop_lines
+set_up_down_bars!(ch::Chart, options::Dict=Dict()) = @ChOpts :set_up_down_bars
+set_drop_lines!(ch::Chart, options::Dict=Dict()) = @ChOpts :set_drop_lines
 set_high_low_lines!(ch::Chart, options::Dict) = @ChOpts :set_high_low_lines
 set_blanks_as!(ch::Chart, option::AbstractString) = @ChOpts :set_blanks_as
 show_hidden_data!(ch::Chart) = ch.py[:show_hidden_data]()
