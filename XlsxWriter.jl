@@ -403,7 +403,7 @@ set_legend!(ch::Chart, options::Dict) = @ChOpts :set_legend
 set_chartarea!(ch::Chart, options::Dict) = @ChOpts :set_chartarea
 set_plotarea!(ch::Chart, options::Dict) = @ChOpts :set_plotarea
 set_style!(ch::Chart, style_id::Int64) = ch.py[:set_style](style_id)
-set_table!(ch::Chart, options::Dict) = @ChOpts :set_table
+set_table!(ch::Chart, options::Dict=Dict()) = @ChOpts :set_table
 set_up_down_bars!(ch::Chart, options::Dict) = @ChOpts :set_up_down_bars
 set_drop_lines!(ch::Chart, options::Dict) = @ChOpts :set_drop_lines
 set_high_low_lines!(ch::Chart, options::Dict) = @ChOpts :set_high_low_lines
