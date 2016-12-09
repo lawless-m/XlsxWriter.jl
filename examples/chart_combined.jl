@@ -14,7 +14,7 @@ ws = add_worksheet!(wb)
 bold = add_format!(wb, Dict("bold"  => 1))
 
 
-# Add the worksheet data that the charts will refer 
+# Add the worksheet data that the charts will refer to.
 headings = ["Number" "Batch 1" "Batch 2"]
 data = [
     [2 3 4 5 6 7];
@@ -28,24 +28,24 @@ write_column!(ws, "B2", data[2,:])
 write_column!(ws, "C2", data[3,:])
 
 #
-# In the first example we will create a combined column and line 
-# They will share the same X and Y 
+# In the first example we will create a combined column and line chart.
+# They will share the same X and Y axes.
 #
 
-# Create a new column  This will use this as the primary 
+# Create a new column  This will use this as the primary chart.
 column_chart1 = add_chart!(wb, Dict("type" => "column"))
 
-# Configure the data series for the primary 
+# Configure the data series for the primary chart.
 add_series!(column_chart1, Dict(
     "name" => "=Sheet1!\$B\$1",
     "categories" => "=Sheet1!\$A\$2:\$A\$7",
     "values" => "=Sheet1!\$B\$2:\$B\$7",
 ))
 
-# Create a new column  This will use this as the secondary 
+# Create a new column  This will use this as the secondary chart.
 line_chart1 = add_chart!(wb, Dict("type" => "line"))
 
-# Configure the data series for the secondary 
+# Configure the data series for the secondary chart.
 add_series!(line_chart1, Dict(
     "name" => "=Sheet1!\$C\$1",
     "categories" => "=Sheet1!\$A\$2:\$A\$7",
@@ -56,7 +56,7 @@ add_series!(line_chart1, Dict(
 combine!(column_chart1, line_chart1)
 
 # Add a chart title and some axis  Note, this is done via the
-# primary 
+# primary chart.
 set_title!(column_chart1, Dict( "name" => "Combined chart - same Y axis"))
 set_x_axis!(column_chart1, Dict("name" => "Test number"))
 set_y_axis!(column_chart1, Dict("name" => "Sample length (mm)"))
@@ -66,25 +66,25 @@ insert_chart!(ws, "E2", column_chart1)
 
 #
 # In the second example we will create a similar combined column and line
-# chart except that the secondary chart will have a secondary Y 
+# chart except that the secondary chart will have a secondary Y axis.
 #
 
-# Create a new column  This will use this as the primary 
+# Create a new column  This will use this as the primary chart.
 column_chart2 = add_chart!(wb, Dict("type" => "column"))
 
-# Configure the data series for the primary 
+# Configure the data series for the primary chart.
 add_series!(column_chart2, Dict(
     "name" => "=Sheet1!\$B\$1",
     "categories" => "=Sheet1!\$A\$2:\$A\$7",
     "values" => "=Sheet1!\$B\$2:\$B\$7",
 ))
 
-# Create a new column  This will use this as the secondary 
+# Create a new column  This will use this as the secondary chart.
 line_chart2 = add_chart!(wb, Dict("type" => "line"))
 
 # Configure the data series for the secondary  We also set a
 # secondary Y axis via (y2_axis). This is the only difference between
-# this and the first example, apart from the axis label 
+# this and the first example, apart from the axis label below.
 add_series!(line_chart2, Dict(
     "name" => "=Sheet1!\$C\$1",
     "categories" => "=Sheet1!\$A\$2:\$A\$7",
@@ -92,15 +92,15 @@ add_series!(line_chart2, Dict(
     "y2_axis" => true,
 ))
 
-# Combine the 
+# Combine the charts.
 combine!(column_chart2, line_chart2)
 
-# Add a chart title and some axis 
+# Add a chart title and some axis labels.
 set_title!(column_chart2, Dict(  "name" => "Combine chart - secondary Y axis"))
 set_x_axis!(column_chart2, Dict( "name" => "Test number"))
 set_y_axis!(column_chart2, Dict( "name" => "Sample length (mm)"))
 
-# Note: the y2 properties are on the secondary 
+# Note: the y2 properties are on the secondary chart.
 set_y2_axis!(line_chart2, Dict("name" => "Target length (mm)"))
 
 # Insert the chart into the worksheet
