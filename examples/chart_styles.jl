@@ -5,7 +5,8 @@
 # the styles available in Excel 2013.
 
 # Original Python Copyright 2013-2016, John McNamara, jmcnamara@cpan.org
-# https:// com/jmcnamara/XlsxWriter
+# https://github.com/jmcnamara/XlsxWriter
+
 include("../XlsxWriter.jl")
 using XlsxWriter
 
