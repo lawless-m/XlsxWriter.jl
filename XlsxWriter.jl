@@ -22,10 +22,11 @@ end
 
 type Workbook
 	py::PyObject
-	io::Union{AbstractString, AbstractIOBUffer}
+	io::Union{AbstractString, IOBuffer}
+	Workbook() = Workbook(IOBuffer())
 	Workbook(fn::AbstractString, opts::Dict=Dict()) = fn == "" ? Workbook(IOBuffer(), opts) : new(xlsxwriter.Workbook(fn, opts), fn)
-	function Workbook(io::AbstractIOBUffer, opts::Dict=Dict())
-		if !has_key(opts, "in_memory")
+	function Workbook(io::IOBuffer, opts::Dict=Dict())
+		if !haskey(opts, "in_memory")
 			opts["in_memory"] = true
 		end
 		new(xlsxwriter.Workbook(io, opts), io)
