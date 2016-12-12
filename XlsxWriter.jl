@@ -16,17 +16,20 @@ export Url
 
 export Worksheet, Chartsheet, set_chart!, write!, write_string!, write_blank!, write_formula!, write_datetime!, write_bool!, write_url!, write_number!, write_array_formula!, write_row!, write_column!, write_matrix!, define_name!, worksheets, get_worksheet_by_name, set_first_sheet!, merge_range!, freeze_panes!, split_panes!, Xls, write_matrix!, data_validation!, conditional_format!, add_table!, add_sparkline!, activate!, select!, hide!, set_first_sheet!, t!, protect!, set_zoom!, set_tab_color!, set_landscape!, set_portrait!, set_paper!, set_margins!, set_header!, set_header!, set_footer!, set_footer!, get_name, write_rich_string!, insert_image!, insert_chart!, insert_textbox!, insert_button!, write_comment!, show_comments!, set_comments_author!, autofilter!, filter_column!, filter_column_list!, set_selection!, set_default_row!, outline_settings!, set_vba_name!, add_vba_project!
 
-
-
-
 type Url
 	url::AbstractString
 end
 
 type Workbook
 	py::PyObject
-	fn::AbstractString
-	Workbook(fn::AbstractString) = new(xlsxwriter.Workbook(fn), fn)
+	io::Union{AbstractString, AbstractIOBUffer}
+	Workbook(fn::AbstractString, opts::Dict=Dict()) = fn == "" ? Workbook(IOBuffer(), opts) : new(xlsxwriter.Workbook(fn, opts), fn)
+	function Workbook(io::AbstractIOBUffer, opts::Dict=Dict())
+		if !has_key(opts, "in_memory")
+			opts["in_memory"] = true
+		end
+		new(xlsxwriter.Workbook(io, opts), io)
+	end
 end
 
 type Worksheet
