@@ -274,11 +274,29 @@ split_panes!(ws::Worksheet,x::Int64, y::Int64, top_row::Int64, left_col::Int64) 
 data_validation!(ws::Worksheet, first_row::Int64, first_col::Int64, last_row::Int64, last_col::Int64, options::Dict) = ws.py[:data_validation](first_row, first_col, last_row, last_col, options)
 data_validation!(ws::Worksheet, first_cell::AbstractString, last_cell::AbstractString, options::Dict) = ws.py[:data_validation](cell2rc(first_cell)..., cell2rc(last_cell)..., options)
 
-conditional_format!(ws::Worksheet, first_row::Int64, first_col::Int64, last_row::Int64, last_col::Int64, options::Dict) = ws.py[:data_validation](first_row, first_col, last_row, last_col, options)
-conditional_format!(ws::Worksheet, first_cell::AbstractString, last_cell::AbstractString, options::Dict) = ws.py[:data_validation](cell2rc(first_cell)..., cell2rc(last_cell)..., options)
+function conditional_format!(ws::Worksheet, first_row::Int64, first_col::Int64, last_row::Int64, last_col::Int64, options::Dict)
+	for k in collect(keys(options))
+		@printf STDERR "k %s type:%s\n" k typeof(options[k])
+		if typeof(options[k]) == "XlsxWriter.Format"
+			options[k] = options[k].py
+		end
+	end
+	ws.py[:conditional_format](first_row, first_col, last_row, last_col, options)
+end
 
-add_table!(ws::Worksheet, first_row::Int64, first_col::Int64, last_row::Int64, last_col::Int64, options::Dict) = ws.py[:data_validation](first_row, first_col, last_row, last_col, options)
-add_table!(ws::Worksheet, first_cell::AbstractString, last_cell::AbstractString, options::Dict) = ws.py[:data_validation](cell2rc(first_cell), cell2rc(last_cell), options)
+conditional_format!(ws::Worksheet, first_cell::AbstractString, last_cell::AbstractString, options::Dict) = conditional_format!(ws, cell2rc(first_cell)..., cell2rc(last_cell)..., options)
+function conditional_format!(ws::Worksheet, cell::AbstractString, options::Dict)
+	if search(cell, ':') > 0
+		f, s = split(cell, ':')
+		conditional_format!(ws, cell2rc(f)..., cell2rc(s)..., options)
+	else
+		conditional_format!(ws, cell2rc(cell)..., cell2rc(cell)..., options)
+	end
+end
+
+
+add_table!(ws::Worksheet, first_row::Int64, first_col::Int64, last_row::Int64, last_col::Int64, options::Dict) = ws.py[:add_table](first_row, first_col, last_row, last_col, options)
+add_table!(ws::Worksheet, first_cell::AbstractString, last_cell::AbstractString, options::Dict) = ws.py[:add_table](cell2rc(first_cell), cell2rc(last_cell), options)
 
 add_sparkline!(ws::Worksheet, row::Int64, col::Int64, options::Dict) = ws.py[:add_sparkline](row, col, options)
 add_sparkline!(ws::Worksheet, cell::AbstractString, options::Dict) = ws.py[:add_sparkline](cell2rc(cell)..., options)
