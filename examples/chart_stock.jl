@@ -8,7 +8,7 @@ include("../XlsxWriter.jl")
 
 using XlsxWriter
 
-wb = Workbook("chart_secondary_axis.xlsx")
+wb = Workbook("chart_stock.xlsx")
 ws = add_worksheet!(wb)
 bold = add_format!(wb, Dict("bold"=> 1))
 
@@ -29,10 +29,10 @@ data = [
 write_row!(ws, "A1", headings, bold)
 
 for row in 1:5
-    write!(ws, row + 1, 0, data[row, 1], date_format)
-    write!(ws, row + 1, 1, data[row, 2])
-    write!(ws, row + 1, 2, data[row, 3])
-    write!(ws, row + 1, 3, data[row, 4])
+    write!(ws, row, 0, data[1, row], date_format)
+    write!(ws, row, 1, data[2, row])
+    write!(ws, row, 2, data[3, row])
+    write!(ws, row, 3, data[4, row])
 end
 
 set_column!(ws, "A:D", 11)
