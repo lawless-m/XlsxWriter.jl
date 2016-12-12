@@ -50,7 +50,7 @@ type Chartsheet
 end
 
 
-typealias Data Union{Real, AbstractString, DateTime, Bool, Url}
+typealias Data Union{Real, AbstractString, DateTime, Date, Bool, Url}
 typealias MaybeFormat Union{Format, Void}
 typealias MaybeData Union{Data, Void}
 
@@ -148,7 +148,7 @@ function write!(ws::Worksheet, row::Int64, col::Int64, fn::Symbol, data::Data, f
 end
 
 # convert r,c into cell format
-write!(ws::Worksheet, row::Int64, col::Int64, data, fmt::MaybeFormat=nothing) = write!(ws, row, col, data, fmt)
+write!(ws::Worksheet, cell::AbstractString, data, fmt::MaybeFormat=nothing) = write!(ws, cell2rc(cell)..., data, fmt)
 write_string! = write!
 
 write!(ws::Worksheet, row::Int64, col::Int64, num::Real, fmt::MaybeFormat=nothing) = write!(ws, row, col, :write_number, num, fmt)
@@ -158,6 +158,7 @@ write!(ws::Worksheet, row::Int64, col::Int64, fmt::MaybeFormat=nothing) = write!
 write_blank! = write!
 
 write!(ws::Worksheet, row::Int64, col::Int64, dt::DateTime, fmt::MaybeFormat=nothing) = write!(ws, row, col, :write_datetime, dt, fmt)
+write!(ws::Worksheet, row::Int64, col::Int64, dt::Date, fmt::MaybeFormat=nothing) = write!(ws, row, col, :write_datetime, dt, fmt)
 write_datetime! = write!
 
 write!(ws::Worksheet, row::Int64, col::Int64, bool::Bool, fmt::MaybeFormat=nothing) = write!(ws, row, col, :write_boolean, bool, fmt)
