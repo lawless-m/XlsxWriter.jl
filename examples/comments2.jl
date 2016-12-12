@@ -214,7 +214,7 @@ set_row!(ws7, 8, 50)
 author = ""
 cell = "C3"
 
-cell_text = "Move the mouse over this cell and you will see \"Cell commented by (blank)\" in the status bar at the bottom"
+cell_text = "Move the mouse over this cell and you will see 'Cell commented by (blank)' in the status bar at the bottom"
 
 comment = "Hello."
 
@@ -223,7 +223,7 @@ write_comment!(ws7, cell, comment)
 
 author = "Julia"
 cell = "C6"
-cell_text = "Move the mouse over this cell and you will see \"Cell commented by Julia\" in the status bar at the bottom"
+cell_text = "Move the mouse over this cell and you will see 'Cell commented by Julia' in the status bar at the bottom"
 
 write!(ws7, cell, cell_text, text_wrap)
 write_comment!(ws7, cell, comment, Dict("author"=> author))
