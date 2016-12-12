@@ -1,5 +1,5 @@
 #######################################################################
-# An example of creating Excel Column charts with Python and  
+# An example of creating Excel Column charts with XlsxWriter
 # Original Python Copyright 2013-2016, John McNamara, jmcnamara@cpan.org
 # https:// com/jmcnamara/XlsxWriter
 
