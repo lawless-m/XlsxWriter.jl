@@ -6,7 +6,7 @@ import Base.close
 using PyCall
 @pyimport xlsxwriter
 
-export Workbook, add_worksheet!, add_format!, set_properties!, set_custom_property!, set_calc_mode!, set_column!, set_row!, add_chart!, close
+export Workbook, add_worksheet!, add_chartsheet!, add_format!, set_properties!, set_custom_property!, set_calc_mode!, set_column!, set_row!, add_chart!, close
 
 export Chart, add_series!, set_x_axis!, set_y_axis!, set_x2_axis!, set_y2_axis!, combine!, set_size!, set_title!, set_legend!, set_chartarea!, set_plotarea!, set_style!, set_table!, set_up_down_bars!, set_drop_lines!, set_high_low_lines!, set_blanks_as!, show_hidden_data!, set_rotation!, set_hole_size!
 
@@ -419,7 +419,7 @@ set_hole_size!(ch::Chart, hole::Int64) = ch.py[:set_hole_size](hole)
 
 # Chartsheet
 
-set_chart!(cs::Chartsheet, ch::Chart) = cs.py[:set_chart](ch)
+set_chart!(cs::Chartsheet, ch::Chart) = cs.py[:set_chart](ch.py)
 
 
 end
