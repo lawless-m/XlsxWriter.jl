@@ -6,7 +6,7 @@ import Base.close
 using PyCall
 @pyimport xlsxwriter
 
-export Workbook, add_worksheet!, add_chartsheet!, add_format!, set_properties!, set_custom_property!, set_calc_mode!, set_column!, set_row!, add_chart!, close
+export Workbook, add_worksheet!, add_chartsheet!, add_format!, set_properties!, set_custom_property!, set_calc_mode!, set_column!, set_row!, add_chart!, close, rc2cell
 
 export Chart, add_series!, set_x_axis!, set_y_axis!, set_x2_axis!, set_y2_axis!, combine!, set_size!, set_title!, set_legend!, set_chartarea!, set_plotarea!, set_style!, set_table!, set_up_down_bars!, set_drop_lines!, set_high_low_lines!, set_blanks_as!, show_hidden_data!, set_rotation!, set_hole_size!
 
@@ -132,7 +132,7 @@ end
 
 function write!(ws::Worksheet, row::Int64, col::Int64, data::AbstractString, fmt::MaybeFormat=nothing)
 	if length(data) > 0
-		if data[1] == '=' || (data[1:2] == "{=" && data[end] == '}')
+		if data[1] == '=' || (length(data) > 1 && (data[1:2] == "{=" && data[end] == '}'))
 			write!(ws, row, col, :write_formula, data, fmt)
 		else
 			write!(ws, row, col, :write_string, data, fmt)
