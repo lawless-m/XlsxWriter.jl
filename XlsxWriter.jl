@@ -145,6 +145,7 @@ end
 
 function write!(ws::Worksheet, row::Int64, col::Int64, fn::Symbol, data::Data, fmt::MaybeFormat=nothing)
 	ws.py[fn](row, col, data, @Fmt)
+	1
 end
 
 # convert r,c into cell format
