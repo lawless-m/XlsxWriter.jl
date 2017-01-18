@@ -92,7 +92,7 @@ close(wb::Workbook) = @WbFn :close
 
 get_worksheet_by_name(wb::Workbook) = @WbFn :get_worksheet_by_name
 set_properties!(wb::Workbook, options::Dict{AbstractString, AbstractString}) = @WbOpts set_properties
-add_format!(wb::Workbook, options::Dict) = Format(@WbOpts :add_format)
+add_format!(wb::Workbook, options::Dict=Dict()) = Format(@WbOpts :add_format)
 set_custom_property!(wb::Workbook, name::AbstractString, value::Data) = wb.py[:set_custom_property](name, value)
 set_calc_mode!(wb::Workbook, mode::AbstractString) = wb.py[:set_calc_mode](mode)
 add_chart!(wb::Workbook, options::Dict) = Chart(@WbOpts :add_chart)
