@@ -1,12 +1,15 @@
 module XlsxWriter
 
+#=
+http://xlsxwriter.readthedocs.io/
+=#
 
 import Base.close
 
 using PyCall
 @pyimport xlsxwriter
 
-export Workbook, add_worksheet!, add_chartsheet!, add_format!, set_properties!, set_custom_property!, set_calc_mode!, set_column!, set_row!, add_chart!, close, rc2cell
+export Workbook, add_worksheet!, add_chartsheet!, add_format!, set_properties!, set_custom_property!, set_calc_mode!, set_column!, set_row!, add_chart!, close, rc2cell, colNtocolA
 
 export Chart, add_series!, set_x_axis!, set_y_axis!, set_x2_axis!, set_y2_axis!, combine!, set_size!, set_title!, set_legend!, set_chartarea!, set_plotarea!, set_style!, set_table!, set_up_down_bars!, set_drop_lines!, set_high_low_lines!, set_blanks_as!, show_hidden_data!, set_rotation!, set_hole_size!
 
@@ -54,14 +57,18 @@ typealias Data Union{Real, AbstractString, DateTime, Date, Bool, Url}
 typealias MaybeFormat Union{Format, Void}
 typealias MaybeData Union{Data, Void}
 
-function rc2cell(row::Int64, col::Int64)
-	cell = string(Char(mod(col, 26) + 65)) * "$(row+1)"
-	col = div(col, 26)
-	while col > 0
-		cell = string(Char(mod(col, 26) + 64)) * cell
-		col = div(col, 26)
+function colNtocolA(n::Int64)
+	a = string(Char(mod(n, 26) + 65))
+	n = div(n, 26)
+	while n > 0
+		a = string(Char(mod(n, 26) + 64)) * a
+		n = div(n, 26)
 	end
-	cell
+	a
+end
+
+function rc2cell(row::Int64, col::Int64)
+	colNtocolA(col) * "$(row+1)"
 end
 
 function cell2rc(cell::AbstractString)
@@ -81,7 +88,6 @@ end
 macro WbOpts(fn)
 	:(wb.py[$fn](options))
 end
-
 
 add_worksheet!(wb::Workbook) = Worksheet(wb.py[:add_worksheet]())
 add_worksheet!(wb::Workbook, name::AbstractString) = Worksheet(wb.py[:add_worksheet](name))
@@ -301,6 +307,7 @@ add_table!(ws::Worksheet, first_cell::AbstractString, last_cell::AbstractString,
 
 add_sparkline!(ws::Worksheet, row::Int64, col::Int64, options::Dict) = ws.py[:add_sparkline](row, col, options)
 add_sparkline!(ws::Worksheet, cell::AbstractString, options::Dict) = ws.py[:add_sparkline](cell2rc(cell)..., options)
+
 
 insert_image!(ws::Worksheet, row::Int64, col::Int64, image::AbstractString, options::Dict=Dict()) = ws.py[:insert_image](row, col, image, options)
 insert_image!(ws::Worksheet, cell::AbstractString, image::AbstractString, options::Dict=Dict()) = ws.py[:insert_image](cell2rc(cell)..., image, options)
