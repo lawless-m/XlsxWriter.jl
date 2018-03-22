@@ -4,6 +4,8 @@ http://xlsxwriter.readthedocs.io/
 
 It is approximately 4x slower than running the Python version
 
+It has some deprecation warnings or julia 0.6 - I shall fix them soon
+
 Installation
 ============
 
