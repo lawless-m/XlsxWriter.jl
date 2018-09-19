@@ -19,11 +19,11 @@ export Url
 
 export Worksheet, Chartsheet, set_chart!, write!, write_string!, write_blank!, write_formula!, write_datetime!, write_bool!, write_url!, write_number!, write_array_formula!, write_row!, write_column!, write_matrix!, define_name!, worksheets, get_worksheet_by_name, set_first_sheet!, merge_range!, freeze_panes!, split_panes!, Xls, write_matrix!, data_validation!, conditional_format!, add_table!, add_sparkline!, activate!, select!, hide!, set_first_sheet!, t!, protect!, set_zoom!, set_tab_color!, set_landscape!, set_portrait!, set_paper!, set_margins!, set_header!, set_header!, set_footer!, set_footer!, get_name, write_rich_string!, insert_image!, insert_chart!, insert_textbox!, insert_button!, write_comment!, show_comments!, set_comments_author!, autofilter!, filter_column!, filter_column_list!, set_selection!, set_default_row!, outline_settings!, set_vba_name!, add_vba_project!
 
-type Url
+struct Url
 	url::AbstractString
 end
 
-type Workbook
+struct Workbook
 	py::PyObject
 	io::Union{AbstractString, IOBuffer}
 	Workbook() = Workbook(IOBuffer())
@@ -36,26 +36,26 @@ type Workbook
 	end
 end
 
-type Worksheet
+struct Worksheet
 	py::PyObject
 end
 
-type Format
+struct Format
 	py::PyObject
 end
 
-type Chart
+struct Chart
 	py::PyObject
 end
 
-type Chartsheet
+struct Chartsheet
 	py::PyObject
 end
 
 
-typealias Data Union{Real, AbstractString, DateTime, Date, Bool, Url}
-typealias MaybeFormat Union{Format, Void}
-typealias MaybeData Union{Data, Void}
+const Data = Union{Real, AbstractString, DateTime, Date, Bool, Url}
+const MaybeFormat = Union{Format, Void}
+const MaybeData = Union{Data, Void}
 
 function colNtocolA(n::Int64)
 	a = string(Char(mod(n, 26) + 65))
@@ -81,60 +81,41 @@ function cell2rc(cell::AbstractString)
 	parse(Int, cell)-1, col-1
 end
 
-# Workbook
-macro WbFn(fn)
-	:(wb.py[$fn]())
-end
-macro WbOpts(fn)
-	:(wb.py[$fn](options))
-end
-
 add_worksheet!(wb::Workbook) = Worksheet(wb.py[:add_worksheet]())
 add_worksheet!(wb::Workbook, name::AbstractString) = Worksheet(wb.py[:add_worksheet](name))
 define_name!(wb::Workbook, name::AbstractString, target::AbstractString) = wb.py[:define_name](name, target)
-worksheets(wb::Workbook) = @WbFn :worksheets
+worksheets(wb::Workbook) = wb.py[:worksheets]()
 
-close(wb::Workbook) = @WbFn :close
+close(wb::Workbook) = wb.py[:close]()
 
-get_worksheet_by_name(wb::Workbook) = @WbFn :get_worksheet_by_name
-set_properties!(wb::Workbook, options::Dict{AbstractString, AbstractString}) = @WbOpts set_properties
-add_format!(wb::Workbook, options::Dict=Dict()) = Format(@WbOpts :add_format)
+get_worksheet_by_name(wb::Workbook) = wb.py[:get_worksheet_by_name]()
+set_properties!(wb::Workbook, options::Dict{AbstractString, AbstractString}) = wb.py[:set_properties](options)
+add_format!(wb::Workbook, options::Dict=Dict()) = Format(wb.py[:add_format](options))
 set_custom_property!(wb::Workbook, name::AbstractString, value::Data) = wb.py[:set_custom_property](name, value)
 set_calc_mode!(wb::Workbook, mode::AbstractString) = wb.py[:set_calc_mode](mode)
-add_chart!(wb::Workbook, options::Dict) = Chart(@WbOpts :add_chart)
-add_chartsheet!(wb::Workbook) = Chartsheet(@WbFn :add_chartsheet)
+add_chart!(wb::Workbook, options::Dict) = Chart(wb.py[:add_chart](options))
+add_chartsheet!(wb::Workbook) = Chartsheet(wb.py[:add_chartsheet]())
 set_size!(wb::Workbook, width::Int64, height::Int64) = wb.py[:set_size](width, height)
 add_vba_project!(wb::Workbook, filename::AbstractString, is_stream::Bool=false) = wb.py[:add_vba_project](filename, is_stream)
 set_vba_name!(wb::Workbook, name::AbstractString) = wb.py[:set_vba_name](name)
-use_zip64!(wb::Workbook) = @WbFn :use_zip64
+use_zip64!(wb::Workbook) = wb.py[:use_zip64]()
+
+set_column!(ws::Worksheet, first_col::Int64, last_col::Int64, width::Real, fmt::MaybeFormat=nothing, options::Dict=Dict()) = ws.py[:set_column](first_col, last_col, width, (fmt == nothing ? fmt : fmt.py), options)
+set_column!(ws::Worksheet, cols::AbstractString, width::Real, fmt::MaybeFormat=nothing, options::Dict=Dict()) = ws.py[:set_column](cols, width, (fmt == nothing ? fmt : fmt.py), options)
 
 
-
-# Worksheet
-macro Fmt()
-	:(fmt == nothing ? fmt : fmt.py)
-end
-
-
-
-set_column!(ws::Worksheet, first_col::Int64, last_col::Int64, width::Real, fmt::MaybeFormat=nothing, options::Dict=Dict()) = ws.py[:set_column](first_col, last_col, width, @Fmt, options)
-set_column!(ws::Worksheet, cols::AbstractString, width::Real, fmt::MaybeFormat=nothing, options::Dict=Dict()) = ws.py[:set_column](cols, width, @Fmt, options)
-set_column!(ws::Worksheet, first_col::Int64, last_col::Int64, width::Real, options::Dict=Dict()) = ws.py[:set_column](first_col, last_col, width, options)
-set_column!(ws::Worksheet, cols::AbstractString, width::Real, options::Dict=Dict()) = ws.py[:set_column](cols, width, options)
-
-set_row!(ws::Worksheet, row::Int64, height::Real, fmt::Format, options::Dict) = ws.py[:set_row](row, height, @Fmt, options)
-set_row!(ws::Worksheet, row::Int64, height::Real, fmt::Format) = ws.py[:set_row](row, height, @Fmt)
+set_row!(ws::Worksheet, row::Int64, height::Real, fmt::Format, options::Dict) = ws.py[:set_row](row, height, (fmt == nothing ? fmt : fmt.py), options)
+set_row!(ws::Worksheet, row::Int64, height::Real, fmt::Format) = ws.py[:set_row](row, height, (fmt == nothing ? fmt : fmt.py))
 set_row!(ws::Worksheet, row::Int64, height::Real) = ws.py[:set_row](row, height)
-set_row!(ws::Worksheet, row::Int64, fmt::Format, options::Dict=Dict()) = ws.py[:set_row](row, nothing, @Fmt, options)
+set_row!(ws::Worksheet, row::Int64, fmt::Format, options::Dict=Dict()) = ws.py[:set_row](row, nothing, (fmt == nothing ? fmt : fmt.py), options)
 set_row!(ws::Worksheet, row::Int64, options::Dict) = ws.py[:set_row](row, nothing, nothing, options)
 
 
 # write_string / write_formula
 
 
-function write!(ws::Worksheet, cell::AbstractString, data, fmt::MaybeFormat=nothing)
-	write!(ws, cell2rc(cell)..., data, fmt)
-end
+write!(ws::Worksheet, cell::AbstractString, data, fmt::MaybeFormat=nothing) = write!(ws, cell2rc(cell)..., data, fmt)
+write_string! = write!
 
 function write!(ws::Worksheet, row::Int64, col::Int64, data::AbstractString, fmt::MaybeFormat=nothing)
 	if length(data) > 0
@@ -150,13 +131,11 @@ end
 #write_formula! = write!
 
 function write!(ws::Worksheet, row::Int64, col::Int64, fn::Symbol, data::Data, fmt::MaybeFormat=nothing)
-	ws.py[fn](row, col, data, @Fmt)
+	ws.py[fn](row, col, data, (fmt == nothing ? fmt : fmt.py))
 	1
 end
 
 # convert r,c into cell format
-write!(ws::Worksheet, cell::AbstractString, data, fmt::MaybeFormat=nothing) = write!(ws, cell2rc(cell)..., data, fmt)
-write_string! = write!
 
 write!(ws::Worksheet, row::Int64, col::Int64, num::Real, fmt::MaybeFormat=nothing) = write!(ws, row, col, :write_number, num, fmt)
 write_number! = write!
@@ -188,35 +167,21 @@ function write_matrix!(ws::Worksheet, row::Int64, col::Int64, data::Matrix, fmt:
 	end
 end
 
-function write_formula!(ws::Worksheet, row::Int64, col::Int64, formula::AbstractString, fmt::MaybeFormat=nothing; result::Data=0)
-	ws.py[:write_formula](row, col, formula, @Fmt, result)
-end
+write_formula!(ws::Worksheet, row::Int64, col::Int64, formula::AbstractString, fmt::MaybeFormat=nothing; result::Data=0) = ws.py[:write_formula](row, col, formula, (fmt == nothing ? fmt : fmt.py), result)
 
-function write_formula!(ws::Worksheet, cell::AbstractString, formula::AbstractString, fmt::MaybeFormat=nothing; result::Data=0)
-	ws.py[:write_formula](cell2rc(cell)..., formula, @Fmt, result)
-end
-
-function write_formula!(ws::Worksheet, row::Int64, col::Int64, formula::AbstractString, result::Data=0)
-	ws.py[:write_formula](row, col, formula, nothing, result)
-end
-
-function write_formula!(ws::Worksheet, cell::AbstractString, formula::AbstractString, result::Data=0)
-	ws.py[:write_formula](cell2rc(cell)..., formula, nothing, result)
-end
-
-
+write_formula!(ws::Worksheet, cell::AbstractString, formula::AbstractString, fmt::MaybeFormat=nothing; result::Data=0) = ws.py[:write_formula](cell2rc(cell)..., formula, (fmt == nothing ? fmt : fmt.py), result)
 
 
 function write_array_formula!(ws::Worksheet, first_row::Int64, first_col::Int64, last_row::Int64, last_col::Int64, formula::AbstractString, fmt::MaybeFormat=nothing)
-	ws.py[:write_array_formula](first_row, first_col, last_row, last_col, formula, @Fmt)
+	ws.py[:write_array_formula](first_row, first_col, last_row, last_col, formula, (fmt == nothing ? fmt : fmt.py))
 end
 
 function write_array_formula!(ws::Worksheet, first_row::Int64, first_col::Int64, formula::AbstractString, fmt::MaybeFormat=nothing)
-	ws.py[:write_array_formula](first_row, first_col, first_row, first_col, formula, @Fmt)
+	ws.py[:write_array_formula](first_row, first_col, first_row, first_col, formula, (fmt == nothing ? fmt : fmt.py))
 end
 
 function write_array_formula!(ws::Worksheet, first_cell::AbstractString, last_cell::AbstractString, formula::AbstractString, fmt::MaybeFormat=nothing)
-	ws.py[:write_array_formula](cell2rc(first_cell)..., cell2rc(last_cell)..., formula, @Fmt)
+	ws.py[:write_array_formula](cell2rc(first_cell)..., cell2rc(last_cell)..., formula, (fmt == nothing ? fmt : fmt.py))
 end
 
 function write_array_formula!(ws::Worksheet, cell::AbstractString, formula::AbstractString, fmt::MaybeFormat=nothing)
@@ -226,27 +191,27 @@ function write_array_formula!(ws::Worksheet, cell::AbstractString, formula::Abst
 		first = last = cell
 	end
 	
-	ws.py[:write_array_formula](cell2rc(first)..., cell2rc(last)..., formula, @Fmt)
+	ws.py[:write_array_formula](cell2rc(first)..., cell2rc(last)..., formula, (fmt == nothing ? fmt : fmt.py))
 end
 
 
 function write_row!(ws::Worksheet, row::Int64, col::Int64, data::Array, fmt::MaybeFormat=nothing)
-	ws.py[:write_row](row, col, vec(data), @Fmt)
+	ws.py[:write_row](row, col, vec(data), (fmt == nothing ? fmt : fmt.py))
 	length(vec(data))
 end
 
 function write_row!(ws::Worksheet, cell::AbstractString, data::Array, fmt::MaybeFormat=nothing)
-	ws.py[:write_row](cell2rc(cell)..., vec(data), @Fmt)
+	ws.py[:write_row](cell2rc(cell)..., vec(data), (fmt == nothing ? fmt : fmt.py))
 	length(vec(data))
 end
 
 function write_column!(ws::Worksheet, row::Int64, col::Int64, data::Array, fmt::MaybeFormat=nothing)
-	ws.py[:write_column](row, col, vec(data), @Fmt)
+	ws.py[:write_column](row, col, vec(data), (fmt == nothing ? fmt : fmt.py))
 	length(vec(data))
 end
 
 function write_column!(ws::Worksheet, cell::AbstractString, data::Array, fmt::MaybeFormat=nothing)
-	ws.py[:write_column](cell2rc(cell)..., vec(data), @Fmt)
+	ws.py[:write_column](cell2rc(cell)..., vec(data), (fmt == nothing ? fmt : fmt.py))
 	length(vec(data))
 end
 
@@ -283,7 +248,6 @@ data_validation!(ws::Worksheet, first_cell::AbstractString, last_cell::AbstractS
 
 function conditional_format!(ws::Worksheet, first_row::Int64, first_col::Int64, last_row::Int64, last_col::Int64, options::Dict)
 	for k in collect(keys(options))
-		@printf STDERR "k %s type:%s\n" k typeof(options[k])
 		if typeof(options[k]) == "XlsxWriter.Format"
 			options[k] = options[k].py
 		end
@@ -301,13 +265,11 @@ function conditional_format!(ws::Worksheet, cell::AbstractString, options::Dict)
 	end
 end
 
-
 add_table!(ws::Worksheet, first_row::Int64, first_col::Int64, last_row::Int64, last_col::Int64, options::Dict) = ws.py[:add_table](first_row, first_col, last_row, last_col, options)
 add_table!(ws::Worksheet, first_cell::AbstractString, last_cell::AbstractString, options::Dict) = ws.py[:add_table](cell2rc(first_cell), cell2rc(last_cell), options)
 
 add_sparkline!(ws::Worksheet, row::Int64, col::Int64, options::Dict) = ws.py[:add_sparkline](row, col, options)
 add_sparkline!(ws::Worksheet, cell::AbstractString, options::Dict) = ws.py[:add_sparkline](cell2rc(cell)..., options)
-
 
 insert_image!(ws::Worksheet, row::Int64, col::Int64, image::AbstractString, options::Dict=Dict()) = ws.py[:insert_image](row, col, image, options)
 insert_image!(ws::Worksheet, cell::AbstractString, image::AbstractString, options::Dict=Dict()) = ws.py[:insert_image](cell2rc(cell)..., image, options)
@@ -343,27 +305,22 @@ set_default_row!(ws::Worksheet, height::Float64=15; hide_unused_rows::Bool=false
 
 outline_settings!(ws::Worksheet, visible::Bool=true, symbols_below::Bool=true, symbols_right::Bool=true, auto_style::Bool=false) = ws.py[:outline_settings](visible, symbols_below, symbols_right, auto_style)
 
-macro PyFn(fn)
-	:(sh.py[$fn]())
-end
-
 # worksheet
-right_to_left!(sh::Worksheet) = @PyFn :right_to_left
-hide_zero!(sh::Worksheet) = @PyFn :hide_zero
 
+hide_zero!(sh::Worksheet) = sh.py[:hide_zero]()
 
 # worksheet or chartsheet
-typealias Sheet Union{Worksheet, Chartsheet}
-activate!(sh::Sheet) = @PyFn :activate
-select!(sh::Sheet) = @PyFn :select
-hide!(sh::Sheet) = @PyFn :hide
-set_first_sheet!(sh::Sheet) = @PyFn :set_first_sheet
-t!(sh::Sheet) = @PyFn :right_to_left
+const Sheet = Union{Worksheet, Chartsheet}
+activate!(sh::Sheet) = sh.py[:activate]()
+select!(sh::Sheet) = sh.py[:select]()
+hide!(sh::Sheet) = sh.py[:hide]()
+set_first_sheet!(sh::Sheet) = sh.py[:set_first_sheet]()
+right_to_left!(sh::Sheet) = sh.py[:right_to_left]()
 protect!(sh::Sheet, password::AbstractString, options::Dict) = sh.py[:protect](password, options)
 set_zoom!(sh::Sheet, zoom::Int64) = sh.py[:set_zoom](zoom)
 set_tab_color!(sh::Sheet, color::AbstractString) = sh.py[:set_tab_color](color)
-set_landscape!(sh::Sheet) = @PyFn :set_landscape
-set_portrait!(sh::Sheet) = @PyFn :set_portrait
+set_landscape!(sh::Sheet) = sh.py[:set_landscape]()
+set_portrait!(sh::Sheet) = sh.py[:set_portrait]()
 set_paper!(sh::Sheet, index::Int64) = sh.py[:set_paper](index)
 set_margins!(sh::Sheet, left::Float64=0.7, right::Float64=0.7, top::Float64=0.75, bottom::Float64=0.75) = sh.py[:set_margins](left, right, top, bottom)
 set_header!(sh::Sheet, header::AbstractString, options::Dict=Dict()) = sh.py[:set_header](header, options)
@@ -372,72 +329,59 @@ set_footer!(sh::Sheet, footer::AbstractString, options::Dict=Dict()) = sh.py[:se
 set_footer!(sh::Sheet, options::Dict) = sh.py[:set_footer]("", options)
 get_name(sh::Sheet) = sh.py[:get_name]()
 
-
-
-
-# Format
-macro SFmt(sym)
-	:(fmt.py[$sym](opt))
-end 
-
-set_font_name!(fmt::Format, opt::AbstractString) = @SFmt :set_font_name
-set_font_size!(fmt::Format, opt::Int64) = @SFmt :set_font_size 
-set_font_color!(fmt::Format, opt::AbstractString) = @SFmt :set_font_color
-set_bold!(fmt::Format, opt::Bool=true) = @SFmt :set_bold
-set_italic!(fmt::Format, opt::Bool=true) = @SFmt :set_italic
-set_underline!(fmt::Format, opt::Bool=true) = @SFmt :set_underline
-set_font_strikeout!(fmt::Format, opt::Bool=true) = @SFmt :set_font_strikeout
-set_font_script!(fmt::Format, opt::Int64) = @SFmt :set_font_script
-set_num_format!(fmt::Format, opt::AbstractString) = @SFmt :set_font_num_format
-set_locked!(fmt::Format, opt::Bool=true) = @SFmt :set_locked
-set_hidden!(fmt::Format, opt::Bool=true) = @SFmt :set_hidden
-set_align!(fmt::Format, opt::AbstractString) = @SFmt :set_align
-set_center_across!(fmt::Format, opt::AbstractString) = @SFmt :set_center_across
-set_text_wrap!(fmt::Format, opt::Bool=true) = @SFmt :set_text_wrap
-set_rotation!(fmt::Format, opt::Int64) = @SFmt :set_rotation
-set_indent!(fmt::Format, opt::Int64) = @SFmt :set_indent
-set_shrink!(fmt::Format, opt::Bool=true) = @SFmt :set_shrink
-set_text_justlast!(fmt::Format, opt::Bool=true) = @SFmt :set_text_justlast
-set_pattern!(fmt::Format, opt::Int64) = @SFmt :set_pattern
-set_bg_color!(fmt::Format, opt::AbstractString) = @SFmt :set_bg_color
-set_fg_color!(fmt::Format, opt::AbstractString) = @SFmt :set_fg_color
-set_border!(fmt::Format, opt::Int64) = @SFmt :set_border
-set_bottom!(fmt::Format, opt::Int64) = @SFmt :set_bottom
-set_top!(fmt::Format, opt::Int64) = @SFmt :set_top
-set_left!(fmt::Format, opt::Int64) = @SFmt :set_left
-set_right!(fmt::Format, opt::Int64) = @SFmt :set_right
-set_border_color!(fmt::Format, opt::AbstractString) = @SFmt :set_border_color
-set_bottom_color!(fmt::Format, opt::AbstractString) = @SFmt :set_bottom_color
-set_top_color!(fmt::Format, opt::AbstractString) = @SFmt :set_top_color
-set_left_color!(fmt::Format, opt::AbstractString) = @SFmt :set_left_color
-set_right_color!(fmt::Format, opt::AbstractString) = @SFmt :set_right_color
-set_diag_border!(fmt::Format, opt::Int64) = @SFmt :set_diag_border
-set_diag_type!(fmt::Format, opt::Int64) = @SFmt :set_diag_type
-set_diag_color!(fmt::Format, opt::AbstractString) = @SFmt :set_diag_color
+set_font_name!(fmt::Format, opt::AbstractString) = fmt.py[:set_font_name](opt)
+set_font_size!(fmt::Format, opt::Int64) = fmt.py[:set_font_size](opt)
+set_font_color!(fmt::Format, opt::AbstractString) = fmt.py[:set_font_color](opt)
+set_bold!(fmt::Format, opt::Bool=true) = fmt.py[:set_bold](opt)
+set_italic!(fmt::Format, opt::Bool=true) = fmt.py[:set_italic](opt)
+set_underline!(fmt::Format, opt::Bool=true) = fmt.py[:set_underline](opt)
+set_font_strikeout!(fmt::Format, opt::Bool=true) = fmt.py[:set_font_strikeout](opt)
+set_font_script!(fmt::Format, opt::Int64) = fmt.py[:set_font_script](opt)
+set_num_format!(fmt::Format, opt::AbstractString) = fmt.py[:set_font_num_format](opt)
+set_locked!(fmt::Format, opt::Bool=true) = fmt.py[:set_locked](opt)
+set_hidden!(fmt::Format, opt::Bool=true) = fmt.py[:set_hidden](opt)
+set_align!(fmt::Format, opt::AbstractString) = fmt.py[:set_align](opt)
+set_center_across!(fmt::Format, opt::AbstractString) = fmt.py[:set_center_across](opt)
+set_text_wrap!(fmt::Format, opt::Bool=true) = fmt.py[:set_text_wrap](opt)
+set_rotation!(fmt::Format, opt::Int64) = fmt.py[:set_rotation](opt)
+set_indent!(fmt::Format, opt::Int64) = fmt.py[:set_indent](opt)
+set_shrink!(fmt::Format, opt::Bool=true) = fmt.py[:set_shrink](opt)
+set_text_justlast!(fmt::Format, opt::Bool=true) = fmt.py[:set_text_justlast](opt)
+set_pattern!(fmt::Format, opt::Int64) = fmt.py[:set_pattern](opt)
+set_bg_color!(fmt::Format, opt::AbstractString) = fmt.py[:set_bg_color](opt)
+set_fg_color!(fmt::Format, opt::AbstractString) = fmt.py[:set_fg_color](opt)
+set_border!(fmt::Format, opt::Int64) = fmt.py[:set_border](opt)
+set_bottom!(fmt::Format, opt::Int64) = fmt.py[:set_bottom](opt)
+set_top!(fmt::Format, opt::Int64) = fmt.py[:set_top](opt)
+set_left!(fmt::Format, opt::Int64) = fmt.py[:set_left](opt)
+set_right!(fmt::Format, opt::Int64) = fmt.py[:set_right](opt)
+set_border_color!(fmt::Format, opt::AbstractString) = fmt.py[:set_border_color](opt)
+set_bottom_color!(fmt::Format, opt::AbstractString) = fmt.py[:set_bottom_color](opt)
+set_top_color!(fmt::Format, opt::AbstractString) = fmt.py[:set_top_color](opt)
+set_left_color!(fmt::Format, opt::AbstractString) = fmt.py[:set_left_color](opt)
+set_right_color!(fmt::Format, opt::AbstractString) = fmt.py[:set_right_color](opt)
+set_diag_border!(fmt::Format, opt::Int64) = fmt.py[:set_diag_border](opt)
+set_diag_type!(fmt::Format, opt::Int64) = fmt.py[:set_diag_type](opt)
+set_diag_color!(fmt::Format, opt::AbstractString) = fmt.py[:set_diag_color](opt)
 
 # Chart
 
-macro ChOpts(fn)
-	:(set_options!(ch.py, $fn, options))
-end
-set_options!(py::PyObject, fn::Symbol, options::Dict) = py[fn](options)
-
-add_series!(ch::Chart, options::Dict=Dict()) = @ChOpts :add_series
-set_x_axis!(ch::Chart, options::Dict=Dict()) = @ChOpts :set_x_axis
-set_y_axis!(ch::Chart, options::Dict=Dict()) = @ChOpts :set_y_axis
-set_x2_axis!(ch::Chart, options::Dict=Dict()) = @ChOpts :set_x2_axis
-set_y2_axis!(ch::Chart, options::Dict=Dict()) = @ChOpts :set_y2_axis
+add_series!(ch::Chart, options::Dict=Dict()) = ch.py[:add_series](options)
+set_x_axis!(ch::Chart, options::Dict=Dict()) = ch.py[:set_x_axis](options)
+set_y_axis!(ch::Chart, options::Dict=Dict()) = ch.py[:set_y_axis](options)
+set_x2_axis!(ch::Chart, options::Dict=Dict()) = ch.py[:set_x2_axis](options)
+set_y2_axis!(ch::Chart, options::Dict=Dict()) = ch.py[:set_y2_axis](options)
 combine!(ch1::Chart, ch2::Chart) = ch1.py[:combine](ch2.py)
-set_size!(ch::Chart, options::Dict=Dict()) = @ChOpts :set_size
-set_title!(ch::Chart, options::Dict=Dict()) = @ChOpts :set_title
-set_legend!(ch::Chart, options::Dict=Dict()) = @ChOpts :set_legend
-set_chartarea!(ch::Chart, options::Dict=Dict()) = @ChOpts :set_chartarea
-set_plotarea!(ch::Chart, options::Dict=Dict()) = @ChOpts :set_plotarea
+set_size!(ch::Chart, options::Dict=Dict()) = ch.py[:set_size](options)
+set_title!(ch::Chart, options::Dict=Dict()) = ch.py[:set_title](options)
+set_legend!(ch::Chart, options::Dict=Dict()) = ch.py[:set_legend](options)
+set_chartarea!(ch::Chart, options::Dict=Dict()) = ch.py[:set_chartarea](options)
+set_plotarea!(ch::Chart, options::Dict=Dict()) = ch.py[:set_plotarea](options)
 set_style!(ch::Chart, style_id::Int64) = ch.py[:set_style](style_id)
-set_table!(ch::Chart, options::Dict=Dict()) = @ChOpts :set_table
-set_up_down_bars!(ch::Chart, options::Dict=Dict()) = @ChOpts :set_up_down_bars
-set_drop_lines!(ch::Chart, options::Dict=Dict()) = @ChOpts :set_drop_lines
-set_high_low_lines!(ch::Chart, options::Dict=Dict()) = @ChOpts :set_high_low_lines
+set_table!(ch::Chart, options::Dict=Dict()) = ch.py[:set_table](options)
+set_up_down_bars!(ch::Chart, options::Dict=Dict()) = ch.py[:set_up_down_bars](options)
+set_drop_lines!(ch::Chart, options::Dict=Dict()) = ch.py[:set_drop_lines](options)
+set_high_low_lines!(ch::Chart, options::Dict=Dict()) = ch.py[:set_high_low_lines](options)
 show_blanks_as!(ch::Chart, option::AbstractString) = ch.py[:show_blanks_as](option)
 show_hidden_data!(ch::Chart) = ch.py[:show_hidden_data]()
 set_rotation!(ch::Chart, angle::Int64) = ch.py[:set_rotation](angle)
@@ -446,6 +390,5 @@ set_hole_size!(ch::Chart, hole::Int64) = ch.py[:set_hole_size](hole)
 # Chartsheet
 
 set_chart!(cs::Chartsheet, ch::Chart) = cs.py[:set_chart](ch.py)
-
 
 end
