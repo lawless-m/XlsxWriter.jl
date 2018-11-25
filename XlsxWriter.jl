@@ -110,9 +110,7 @@ set_row!(ws::Worksheet, row::Int64, height::Real) = ws.py[:set_row](row, height)
 set_row!(ws::Worksheet, row::Int64, fmt::Format, options::Dict=Dict()) = ws.py[:set_row](row, nothing, (fmt == nothing ? fmt : fmt.py), options)
 set_row!(ws::Worksheet, row::Int64, options::Dict) = ws.py[:set_row](row, nothing, nothing, options)
 
-
 # write_string / write_formula
-
 
 write!(ws::Worksheet, cell::AbstractString, data, fmt::MaybeFormat=nothing) = write!(ws, cell2rc(cell)..., data, fmt)
 write_string! = write!
@@ -220,6 +218,7 @@ function write_rich_string!(ws::Worksheet, row::Int64, col::Int64, parts...)
 	unwrap(a) = a
 	ws.py[:write_rich_string](row, col, [unwrap(p) for p in parts]...)
 end
+
 function write_rich_string!(ws::Worksheet, cell::AbstractString, parts...)
 	unwrap(f::Format) = f.py
 	unwrap(a) = a
