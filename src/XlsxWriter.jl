@@ -7,10 +7,13 @@ http://xlsxwriter.readthedocs.io/
 import Base.close
 
 using PyCall
+using Dates
+
 
 const xlsxwriter = PyNULL()
 
 function __init__() 
+	pushfirst!(PyVector(pyimport("sys")["path"]), raw"C:\Users\matthew.heath\repos\XLSWriter.py")
 	copy!(xlsxwriter, pyimport("xlsxwriter"))
 end
 
@@ -60,8 +63,8 @@ end
 
 
 const Data = Union{Real, AbstractString, DateTime, Date, Bool, Url}
-const MaybeFormat = Union{Format, Void}
-const MaybeData = Union{Data, Void}
+
+pyfmt(fmt) = fmt == nothing ? nothing : fmt.py
 
 function colNtocolA(n::Int64)
 	a = string(Char(mod(n, 26) + 65))
@@ -106,116 +109,111 @@ add_vba_project!(wb::Workbook, filename::AbstractString, is_stream::Bool=false) 
 set_vba_name!(wb::Workbook, name::AbstractString) = wb.py[:set_vba_name](name)
 use_zip64!(wb::Workbook) = wb.py[:use_zip64]()
 
-set_column!(ws::Worksheet, first_col::Int64, last_col::Int64, width::Real, fmt::MaybeFormat=nothing, options::Dict=Dict()) = ws.py[:set_column](first_col, last_col, width, (fmt == nothing ? fmt : fmt.py), options)
-set_column!(ws::Worksheet, cols::AbstractString, width::Real, fmt::MaybeFormat=nothing, options::Dict=Dict()) = ws.py[:set_column](cols, width, (fmt == nothing ? fmt : fmt.py), options)
+set_column!(ws::Worksheet, first_col::Int64, last_col::Int64, width::Real; fmt=nothing, options::Dict=Dict()) = ws.py[:set_column](first_col, last_col, width, pyfmt(fmt), options)
+set_column!(ws::Worksheet, cols::AbstractString, width::Real; fmt=nothing, options::Dict=Dict()) = ws.py[:set_column](cols, width, pyfmt(fmt), options)
 
-
-set_row!(ws::Worksheet, row::Int64, height::Real, fmt::Format, options::Dict) = ws.py[:set_row](row, height, (fmt == nothing ? fmt : fmt.py), options)
-set_row!(ws::Worksheet, row::Int64, height::Real, fmt::Format) = ws.py[:set_row](row, height, (fmt == nothing ? fmt : fmt.py))
-set_row!(ws::Worksheet, row::Int64, height::Real) = ws.py[:set_row](row, height)
-set_row!(ws::Worksheet, row::Int64, fmt::Format, options::Dict=Dict()) = ws.py[:set_row](row, nothing, (fmt == nothing ? fmt : fmt.py), options)
-set_row!(ws::Worksheet, row::Int64, options::Dict) = ws.py[:set_row](row, nothing, nothing, options)
+set_row!(ws::Worksheet, row::Int64; height=nothing, fmt=nothing, options::Dict=Dict()) = ws.py[:set_row](row, height, pyfmt(fmt), options)
 
 # write_string / write_formula
 
-write!(ws::Worksheet, cell::AbstractString, data, fmt::MaybeFormat=nothing) = write!(ws, cell2rc(cell)..., data, fmt)
+write!(ws::Worksheet, cell::AbstractString, data; fmt=nothing) = write!(ws, cell2rc(cell)..., data, fmt=fmt)
 write_string! = write!
 
-function write!(ws::Worksheet, row::Int64, col::Int64, data::AbstractString, fmt::MaybeFormat=nothing)
+function write!(ws::Worksheet, row::Int64, col::Int64, data::AbstractString; fmt=nothing)
 	if length(data) > 0
 		if data[1] == '=' || (length(data) > 1 && (data[1:2] == "{=" && data[end] == '}'))
-			write!(ws, row, col, :write_formula, data, fmt)
+			write!(ws, row, col, :write_formula, data, fmt=fmt)
 		else
-			write!(ws, row, col, :write_string, data, fmt)
+			write!(ws, row, col, :write_string, data, fmt=fmt)
 		end
 	else
-		write!(ws, row, col, :write_blank, data, fmt)
+		write!(ws, row, col, :write_blank, data, fmt=fmt)
 	end
 end
 #write_formula! = write!
 
-function write!(ws::Worksheet, row::Int64, col::Int64, fn::Symbol, data::Data, fmt::MaybeFormat=nothing)
-	ws.py[fn](row, col, data, (fmt == nothing ? fmt : fmt.py))
+function write!(ws::Worksheet, row::Int64, col::Int64, fn::Symbol, data::Data; fmt=nothing)
+	ws.py[fn](row, col, data, pyfmt(fmt))
 	1
 end
 
 # convert r,c into cell format
 
-write!(ws::Worksheet, row::Int64, col::Int64, num::Real, fmt::MaybeFormat=nothing) = write!(ws, row, col, :write_number, num, fmt)
+write!(ws::Worksheet, row::Int64, col::Int64, num::Real; fmt=nothing) = write!(ws, row, col, :write_number, num, fmt=fmt)
 write_number! = write!
 
-write!(ws::Worksheet, row::Int64, col::Int64, fmt::MaybeFormat=nothing) = write!(ws, row, col, :write_blank, fmt)
+write!(ws::Worksheet, row::Int64, col::Int64; fmt=nothing) = write!(ws, row, col, :write_blank, fmt=fmt)
 write_blank! = write!
 
-write!(ws::Worksheet, row::Int64, col::Int64, dt::DateTime, fmt::MaybeFormat=nothing) = write!(ws, row, col, :write_datetime, dt, fmt)
-write!(ws::Worksheet, row::Int64, col::Int64, dt::Date, fmt::MaybeFormat=nothing) = write!(ws, row, col, :write_datetime, dt, fmt)
+write!(ws::Worksheet, row::Int64, col::Int64, dt::DateTime; fmt=nothing) = write!(ws, row, col, :write_datetime, dt, fmt=fmt)
+write!(ws::Worksheet, row::Int64, col::Int64, dt::Date; fmt=nothing) = write!(ws, row, col, :write_datetime, dt, fmt=fmt)
 write_datetime! = write!
 
-write!(ws::Worksheet, row::Int64, col::Int64, bool::Bool, fmt::MaybeFormat=nothing) = write!(ws, row, col, :write_boolean, bool, fmt)
+write!(ws::Worksheet, row::Int64, col::Int64, bool::Bool; fmt=nothing) = write!(ws, row, col, :write_boolean, bool, fmt=fmt)
 write_bool! = write!
 
-write!(ws::Worksheet, row::Int64, col::Int64, u::Url, fmt::MaybeFormat=nothing) = write!(ws, row, col, :write_url, u.url, fmt)
+write!(ws::Worksheet, row::Int64, col::Int64, u::Url; fmt=nothing) = write!(ws, row, col, :write_url, u.url, fmt=fmt)
 write_url! = write!
 
-function write_matrix!(ws::Worksheet, row::Int64, col::Int64, data::Matrix, fmt::MaybeFormat=nothing)
+function write_matrix!(ws::Worksheet, row::Int64, col::Int64, data::Matrix; fmt=nothing)
 	re = size(data, 1)-1
 	ce = size(data, 2)-1
 	if re > ce
 		for c in 0:ce
-			write_column!(ws, row, col+c, vec(data[:, c+1]), fmt)
+			write_column!(ws, row, col+c, vec(data[:, c+1]), fmt=fmt)
 		end
 	else
 		for r in 0:re
-			write_row!(ws, row+r, col, vec(data[r+1, :]), fmt)
+			write_row!(ws, row+r, col, vec(data[r+1, :]), fmt=fmt)
 		end
 	end
 end
 
-write_formula!(ws::Worksheet, row::Int64, col::Int64, formula::AbstractString, fmt::MaybeFormat=nothing; result::Data=0) = ws.py[:write_formula](row, col, formula, (fmt == nothing ? fmt : fmt.py), result)
+write_formula!(ws::Worksheet, row::Int64, col::Int64, formula::AbstractString; fmt=nothing, result::Data=0) = ws.py[:write_formula](row, col, formula, pyfmt(fmt), result)
 
-write_formula!(ws::Worksheet, cell::AbstractString, formula::AbstractString, fmt::MaybeFormat=nothing; result::Data=0) = ws.py[:write_formula](cell2rc(cell)..., formula, (fmt == nothing ? fmt : fmt.py), result)
+write_formula!(ws::Worksheet, cell::AbstractString, formula::AbstractString; fmt=nothing, result::Data=0) = ws.py[:write_formula](cell2rc(cell)..., formula, pyfmt(fmt), result)
 
 
-function write_array_formula!(ws::Worksheet, first_row::Int64, first_col::Int64, last_row::Int64, last_col::Int64, formula::AbstractString, fmt::MaybeFormat=nothing)
-	ws.py[:write_array_formula](first_row, first_col, last_row, last_col, formula, (fmt == nothing ? fmt : fmt.py))
+function write_array_formula!(ws::Worksheet, first_row::Int64, first_col::Int64, last_row::Int64, last_col::Int64, formula::AbstractString; fmt=nothing)
+	ws.py[:write_array_formula](first_row, first_col, last_row, last_col, formula, pyfmt(fmt))
 end
 
-function write_array_formula!(ws::Worksheet, first_row::Int64, first_col::Int64, formula::AbstractString, fmt::MaybeFormat=nothing)
-	ws.py[:write_array_formula](first_row, first_col, first_row, first_col, formula, (fmt == nothing ? fmt : fmt.py))
+function write_array_formula!(ws::Worksheet, first_row::Int64, first_col::Int64, formula::AbstractString; fmt=nothing)
+	ws.py[:write_array_formula](first_row, first_col, first_row, first_col, formula, pyfmt(fmt))
 end
 
-function write_array_formula!(ws::Worksheet, first_cell::AbstractString, last_cell::AbstractString, formula::AbstractString, fmt::MaybeFormat=nothing)
-	ws.py[:write_array_formula](cell2rc(first_cell)..., cell2rc(last_cell)..., formula, (fmt == nothing ? fmt : fmt.py))
+function write_array_formula!(ws::Worksheet, first_cell::AbstractString, last_cell::AbstractString, formula::AbstractString; fmt=nothing)
+	ws.py[:write_array_formula](cell2rc(first_cell)..., cell2rc(last_cell)..., formula, pyfmt(fmt))
 end
 
-function write_array_formula!(ws::Worksheet, cell::AbstractString, formula::AbstractString, fmt::MaybeFormat=nothing)
+function write_array_formula!(ws::Worksheet, cell::AbstractString, formula::AbstractString; fmt=nothing)
 	if search(cell, ':') > 0
 		first, last = split(cell, ':')
 	else
 		first = last = cell
 	end
 	
-	ws.py[:write_array_formula](cell2rc(first)..., cell2rc(last)..., formula, (fmt == nothing ? fmt : fmt.py))
+	ws.py[:write_array_formula](cell2rc(first)..., cell2rc(last)..., formula, pyfmt(fmt))
 end
 
 
-function write_row!(ws::Worksheet, row::Int64, col::Int64, data::Array, fmt::MaybeFormat=nothing)
-	ws.py[:write_row](row, col, vec(data), (fmt == nothing ? fmt : fmt.py))
+function write_row!(ws::Worksheet, row::Int64, col::Int64, data::Array; fmt=nothing)
+	ws.py[:write_row](row, col, vec(data), pyfmt(fmt))
 	length(vec(data))
 end
 
-function write_row!(ws::Worksheet, cell::AbstractString, data::Array, fmt::MaybeFormat=nothing)
-	ws.py[:write_row](cell2rc(cell)..., vec(data), (fmt == nothing ? fmt : fmt.py))
+function write_row!(ws::Worksheet, cell::AbstractString, data::Array; fmt=nothing)
+	ws.py[:write_row](cell2rc(cell)..., vec(data), pyfmt(fmt))
 	length(vec(data))
 end
 
-function write_column!(ws::Worksheet, row::Int64, col::Int64, data::Array, fmt::MaybeFormat=nothing)
-	ws.py[:write_column](row, col, vec(data), (fmt == nothing ? fmt : fmt.py))
+function write_column!(ws::Worksheet, row::Int64, col::Int64, data::Array; fmt=nothing)
+	ws.py[:write_column](row, col, vec(data), pyfmt(fmt))
 	length(vec(data))
 end
 
-function write_column!(ws::Worksheet, cell::AbstractString, data::Array, fmt::MaybeFormat=nothing)
-	ws.py[:write_column](cell2rc(cell)..., vec(data), (fmt == nothing ? fmt : fmt.py))
+function write_column!(ws::Worksheet, cell::AbstractString, data::Array; fmt=nothing)
+	ws.py[:write_column](cell2rc(cell)..., vec(data), pyfmt(fmt))
 	length(vec(data))
 end
 
@@ -233,11 +231,7 @@ end
 
 set_first_sheet!(ws::Worksheet) = ws.py[:set_first_sheet]()
 
-merge_range!(ws::Worksheet, first_row::Int64, first_col::Int64, last_row::Int64, last_col::Int64, contents, fmt::MaybeFormat=nothing) = merge_range!(first_row, first_col, last_row, last_col, contents, fmt)
-
-merge_range!(ws::Worksheet, first_row::Int64, first_col::Int64, last_row::Int64, last_col::Int64, contents, fmt::Format) = ws.py[:merge_range](first_row, first_col, last_row, last_col, contents, fmt.py)
-
-merge_range!(ws::Worksheet, first_row::Int64, first_col::Int64, last_row::Int64, last_col::Int64, contents, fmt::Void) = ws.py[:merge_range](first_row, first_col, last_row, last_col, contents)
+merge_range!(ws::Worksheet, first_row::Int64, first_col::Int64, last_row::Int64, last_col::Int64, contents; fmt=nothing) = ws.py[:merge_range](first_row, first_col, last_row, last_col, contents, pyfmt(fmt))
 
 freeze_panes!(ws::Worksheet, row::Int64, col::Int64) = ws.py[:freeze_panes](row, col)
 freeze_panes!(ws::Worksheet, cell::AbstractString) = ws.py[:freeze_panes](cell2rc(cell)...)
