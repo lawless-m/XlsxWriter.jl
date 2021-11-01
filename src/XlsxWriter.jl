@@ -13,7 +13,7 @@ using Dates
 const xlsxwriter = PyNULL()
 
 function __init__() 
-	pushfirst!(PyVector(pyimport("sys")["path"]), raw"C:\Users\matthew.heath\repos\XLSWriter.py")
+	pushfirst!(PyVector(pyimport("sys")["path"]), raw"C:\Users\matthew.heath\repos\XlsxWriter.py")
 	copy!(xlsxwriter, pyimport("xlsxwriter"))
 end
 
