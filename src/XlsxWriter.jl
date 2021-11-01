@@ -13,10 +13,13 @@ using Dates
 const xlsxwriter = PyNULL()
 
 function __init__() 
-	pushfirst!(PyVector(pyimport("sys")["path"]), raw"C:\Users\matthew.heath\repos\XlsxWriter.py")
-	copy!(xlsxwriter, pyimport("xlsxwriter"))
+	if haskey(ENV, "XLSXWRITER_PATH")
+		pushfirst!(PyVector(pyimport("sys")["path"]), ENV["XLSXWRITER_PATH"])
+		copy!(xlsxwriter, pyimport("xlsxwriter"))
+	else
+		throw("Need to set ENV[\"XLSXWRITER_PATH\"] to the path where the xlsxwriter folder can be found. For me that is: raw\"C:\Users\matt\repos\XlsxWriter.py\"")
+	end
 end
-
 
 export Workbook, add_worksheet!, add_chartsheet!, add_format!, set_properties!, set_custom_property!, set_calc_mode!, set_column!, set_row!, add_chart!, close, rc2cell, colNtocolA
 
