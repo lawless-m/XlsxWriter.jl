@@ -119,7 +119,7 @@ set_row!(ws::Worksheet, row::Int64; height=nothing, fmt=nothing, options::Dict=D
 write!(ws::Worksheet, cell::AbstractString, data; fmt=nothing) = write!(ws, cell2rc(cell)..., data, fmt=fmt)
 write_string! = write!
 
-function write!(ws::Worksheet, row::Int64, col::Int64, data::AbstractString; fmt=nothing)
+function write!(ws::Worksheet, row::Int64, col::Int64, data::String; fmt=nothing)
 	if length(data) > 0
 		if data[1] == '=' || (length(data) > 1 && (data[1:2] == "{=" && data[end] == '}'))
 			write!(ws, row, col, :write_formula, data, fmt=fmt)
