@@ -6,7 +6,9 @@ https://github.com/jmcnamara/XlsxWriter
 
 which is the *best* Excel writing module for Python, hands down.
 
-To make it work, it isup to you, dear user, to arrange for the Python code to be available
+Today I finally got it to work as a proper Julia package so you can just Pkg.add("https://github.com/lawless-m/XlsxWriter.jl") and start using it, after a little more setup.
+
+To make it work, it is up to you, dear user, to arrange for the Python code to be available
 
 I've used an environment variable for the task : ENV["XLSXWRITER_PATH"]
 
