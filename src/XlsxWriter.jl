@@ -7,7 +7,13 @@ http://xlsxwriter.readthedocs.io/
 import Base.close
 
 using PyCall
-@pyimport xlsxwriter
+
+const xlsxwriter = PyNULL()
+
+function __init__() 
+	copy!(xlsxwriter, pyimport("xlsxwriter"))
+end
+
 
 export Workbook, add_worksheet!, add_chartsheet!, add_format!, set_properties!, set_custom_property!, set_calc_mode!, set_column!, set_row!, add_chart!, close, rc2cell, colNtocolA
 
