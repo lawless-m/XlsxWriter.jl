@@ -1,4 +1,4 @@
-# XLSXWriter
+# XLSXWriter - it's working again!
 
 This is a wrapper around 
 
