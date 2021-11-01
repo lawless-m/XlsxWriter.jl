@@ -16,7 +16,7 @@ function __init__()
 		pushfirst!(PyVector(pyimport("sys")["path"]), ENV["XLSXWRITER_PATH"])
 		copy!(xlsxwriter, pyimport("xlsxwriter"))
 	else
-		throw("Need to set ENV[\"XLSXWRITER_PATH\"] to the path where the xlsxwriter folder can be found. For me that is: raw\"C:\\Users\\matt\\repos\\XlsxWriter.py\\\"")
+		throw("Need to set ENV[\"XLSXWRITER_PATH\"] to the path where the xlsxwriter folder can be found. For me that is: raw\"C:\\Users\\matt\\repos\\XlsxWriter.py\\\" and reload or call XlsxWriter.__init__() ")
 	end
 end
 
