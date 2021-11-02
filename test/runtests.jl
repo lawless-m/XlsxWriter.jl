@@ -40,3 +40,5 @@ filehash(fn) = open(fn) do f  bytes2hex(sha2_256(f))  end
 	@test include("demo.jl") 
 	@test include("in_memory.jl")
 end
+
+println("All this actually tests for is that the code ran and produced .xlsx files.\nWhich is better than nothing.\nThe output is not necessarily correct.")
