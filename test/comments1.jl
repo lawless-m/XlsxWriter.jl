@@ -7,14 +7,21 @@
 # Original Python Copyright 2013-2016, John McNamara, jmcnamara@cpan.org
 # https://github.com/jmcnamara/XlsxWriter
 
-include("../XlsxWriter.jl")
+
 
 using XlsxWriter
 
-wb = Workbook("comments1.xlsx")
-ws = add_worksheet!(wb)
+function test()
 
-write!(ws, "A1", "Hello")
-write_comment!(ws, "A1", "This is a comment")
+	wb = Workbook("comments1.xlsx")
+	ws = add_worksheet!(wb)
 
-close(wb)
+	write!(ws, "A1", "Hello")
+	write_comment!(ws, "A1", "This is a comment")
+
+	close(wb)
+	isfile("comments1.xlsx")
+
+end
+
+test()

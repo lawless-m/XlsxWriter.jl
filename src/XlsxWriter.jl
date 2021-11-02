@@ -20,15 +20,15 @@ function __init__()
 	end
 end
 
-export Workbook, add_worksheet!, add_chartsheet!, add_format!, set_properties!, set_custom_property!, set_calc_mode!, set_column!, set_row!, add_chart!, close, rc2cell, colNtocolA
+export add_worksheet!, add_chartsheet!, add_format!, set_properties!, set_custom_property!, set_calc_mode!, set_column!, set_row!, add_chart!, close, rc2cell, colNtocolA
 
-export Chart, add_series!, set_x_axis!, set_y_axis!, set_x2_axis!, set_y2_axis!, combine!, set_size!, set_title!, set_legend!, set_chartarea!, set_plotarea!, set_style!, set_table!, set_up_down_bars!, set_drop_lines!, set_high_low_lines!, set_blanks_as!, show_hidden_data!, set_rotation!, set_hole_size!
+export add_series!, set_x_axis!, set_y_axis!, set_x2_axis!, set_y2_axis!, combine!, set_size!, set_title!, set_legend!, set_chartarea!, set_plotarea!, set_style!, set_table!, set_up_down_bars!, set_drop_lines!, set_high_low_lines!, set_blanks_as!, show_hidden_data!, set_rotation!, set_hole_size!
 
-export Format, set_font_name!, set_font_size!, set_font_color!, set_bold!, set_italic!, set_underline!, set_font_strikeout!, set_font_script!, set_num_format!, set_locked!, set_hidden!, set_align!, set_center_across!, set_text_wrap!, set_rotation!, set_indent!, set_shrink!, set_text_justlast!, set_pattern!, set_bg_color!, set_fg_color!, set_border!, set_bottom!, set_top!, set_left!, set_right!, set_border_color!, set_bottom_color!, set_top_color!, set_left_color!, set_right_color!, set_diag_border!, set_diag_type!, set_diag_color!
+export set_font_name!, set_font_size!, set_font_color!, set_bold!, set_italic!, set_underline!, set_font_strikeout!, set_font_script!, set_num_format!, set_locked!, set_hidden!, set_align!, set_center_across!, set_text_wrap!, set_rotation!, set_indent!, set_shrink!, set_text_justlast!, set_pattern!, set_bg_color!, set_fg_color!, set_border!, set_bottom!, set_top!, set_left!, set_right!, set_border_color!, set_bottom_color!, set_top_color!, set_left_color!, set_right_color!, set_diag_border!, set_diag_type!, set_diag_color!
 
-export Url 
+export set_chart!, write!, write_string!, write_blank!, write_formula!, write_datetime!, write_bool!, write_url!, write_number!, write_array_formula!, write_row!, write_column!, write_matrix!, define_name!, worksheets, get_worksheet_by_name, set_first_sheet!, merge_range!, freeze_panes!, split_panes!, Xls, write_matrix!, data_validation!, conditional_format!, add_table!, add_sparkline!, activate!, select!, hide!, set_first_sheet!, t!, protect!, set_zoom!, set_tab_color!, set_landscape!, set_portrait!, set_paper!, set_margins!, set_header!, set_header!, set_footer!, set_footer!, get_name, write_rich_string!, insert_image!, insert_chart!, insert_textbox!, insert_button!, write_comment!, show_comments!, set_comments_author!, autofilter!, filter_column!, filter_column_list!, set_selection!, set_default_row!, outline_settings!, set_vba_name!, add_vba_project!
 
-export Worksheet, Chartsheet, set_chart!, write!, write_string!, write_blank!, write_formula!, write_datetime!, write_bool!, write_url!, write_number!, write_array_formula!, write_row!, write_column!, write_matrix!, define_name!, worksheets, get_worksheet_by_name, set_first_sheet!, merge_range!, freeze_panes!, split_panes!, Xls, write_matrix!, data_validation!, conditional_format!, add_table!, add_sparkline!, activate!, select!, hide!, set_first_sheet!, t!, protect!, set_zoom!, set_tab_color!, set_landscape!, set_portrait!, set_paper!, set_margins!, set_header!, set_header!, set_footer!, set_footer!, get_name, write_rich_string!, insert_image!, insert_chart!, insert_textbox!, insert_button!, write_comment!, show_comments!, set_comments_author!, autofilter!, filter_column!, filter_column_list!, set_selection!, set_default_row!, outline_settings!, set_vba_name!, add_vba_project!
+# type definitions
 
 struct Url
 	url::AbstractString
@@ -66,6 +66,16 @@ end
 
 const Data = Union{Real, AbstractString, DateTime, Date, Bool, Url}
 
+@enum CALC_MODES manual  auto_except_tables auto
+const calc_modes = Dict(manual=>"manual", auto_except_tables=>"auto_except_tables", auto=>"auto")
+
+# end of type definitions so export them
+
+export Url, Workbook, Worksheet, Format, Chart, Chartsheet, Data, manual, auto_except_tables, auto
+
+#####
+
+
 pyfmt(fmt) = fmt == nothing ? nothing : fmt.py
 
 function colNtocolA(n::Int64)
@@ -78,9 +88,7 @@ function colNtocolA(n::Int64)
 	a
 end
 
-function rc2cell(row::Int64, col::Int64)
-	colNtocolA(col) * "$(row+1)"
-end
+rc2cell(row::Int64, col::Int64) = "$(colNtocolA(col))$(row+1)"
 
 function cell2rc(cell::AbstractString)
 	col = 0
@@ -100,10 +108,10 @@ worksheets(wb::Workbook) = wb.py[:worksheets]()
 close(wb::Workbook) = wb.py[:close]()
 
 get_worksheet_by_name(wb::Workbook) = wb.py[:get_worksheet_by_name]()
-set_properties!(wb::Workbook, options::Dict{AbstractString, AbstractString}) = wb.py[:set_properties](options)
+set_properties!(wb::Workbook, options::Dict) = wb.py[:set_properties](options)
 add_format!(wb::Workbook, options::Dict=Dict()) = Format(wb.py[:add_format](options))
 set_custom_property!(wb::Workbook, name::AbstractString, value::Data) = wb.py[:set_custom_property](name, value)
-set_calc_mode!(wb::Workbook, mode::AbstractString) = wb.py[:set_calc_mode](mode)
+set_calc_mode!(wb::Workbook, mode::CALC_MODES) = wb.py[:set_calc_mode](calc_modes[mode])
 add_chart!(wb::Workbook, options::Dict) = Chart(wb.py[:add_chart](options))
 add_chartsheet!(wb::Workbook) = Chartsheet(wb.py[:add_chartsheet]())
 set_size!(wb::Workbook, width::Int64, height::Int64) = wb.py[:set_size](width, height)
@@ -189,7 +197,7 @@ function write_array_formula!(ws::Worksheet, first_cell::AbstractString, last_ce
 end
 
 function write_array_formula!(ws::Worksheet, cell::AbstractString, formula::AbstractString; fmt=nothing)
-	if search(cell, ':') > 0
+	if occursin(':', cell) > 0
 		first, last = split(cell, ':')
 	else
 		first = last = cell
@@ -258,7 +266,7 @@ end
 
 conditional_format!(ws::Worksheet, first_cell::AbstractString, last_cell::AbstractString, options::Dict) = conditional_format!(ws, cell2rc(first_cell)..., cell2rc(last_cell)..., options)
 function conditional_format!(ws::Worksheet, cell::AbstractString, options::Dict)
-	if search(cell, ':') > 0
+	if occursin(':', cell) > 0
 		f, s = split(cell, ':')
 		conditional_format!(ws, cell2rc(f)..., cell2rc(s)..., options)
 	else
