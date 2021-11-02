@@ -95,7 +95,7 @@ function test()
 	#
 	caption = "Duplicate values are in light red. Unique values are in light green."
 
-	write!("A1", caption)
+	write!(ws3, "A1", caption)
 
 	for row in size(data, 2)
 		write_row!(ws3, row + 2, 1, data[row,:])
@@ -175,7 +175,7 @@ function test()
 	#
 	caption = "Examples of color scales and data bars. Default colors."
 
-	data = range(1, 13)
+	data = collect(1:13)
 
 	write!(ws7, "A1", caption)
 
@@ -183,10 +183,10 @@ function test()
 	write!(ws7, "D2", "3 Color Scale")
 	write!(ws7, "F2", "Data Bars")
 
-	for row in size(data, 2)
-		write!(ws7, row + 2, 1, data[row,:])
-		write!(ws7, row + 2, 3, data[row,:])
-		write!(ws7, row + 2, 5, data[row,:])
+	for row in length(data)
+		write!(ws7, row + 2, 1, data[row])
+		write!(ws7, row + 2, 3, data[row])
+		write!(ws7, row + 2, 5, data[row])
 	end
 
 	conditional_format!(ws7, "B3:B14", Dict("type"=> "2_color_scale"))
@@ -200,7 +200,7 @@ function test()
 	#
 	caption = "Examples of color scales and data bars. Modified colors."
 
-	data = range(1, 13)
+	data = collect(1:13)
 
 	write!(ws8, "A1", caption)
 
@@ -208,10 +208,10 @@ function test()
 	write!(ws8, "D2", "3 Color Scale")
 	write!(ws8, "F2", "Data Bars")
 
-	for row in size(data, 2)
-		write!(ws8, row + 2, 1, data[row,:])
-		write!(ws8, row + 2, 3, data[row,:])
-		write!(ws8, row + 2, 5, data[row,:])
+	for row in length(data)
+		write!(ws8, row + 2, 1, data[row])
+		write!(ws8, row + 2, 3, data[row])
+		write!(ws8, row + 2, 5, data[row])
 	end
 	conditional_format!(ws8, "B3:B14", Dict("type"=> "2_color_scale",
 											 "min_color"=> "#FF0000",

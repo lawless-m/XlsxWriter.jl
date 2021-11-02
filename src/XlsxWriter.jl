@@ -257,7 +257,7 @@ data_validation!(ws::Worksheet, first_cell::AbstractString, last_cell::AbstractS
 
 function conditional_format!(ws::Worksheet, first_row::Int64, first_col::Int64, last_row::Int64, last_col::Int64, options::Dict)
 	for k in collect(keys(options))
-		if typeof(options[k]) == "XlsxWriter.Format"
+		if typeof(options[k]) == XlsxWriter.Format
 			options[k] = options[k].py
 		end
 	end
