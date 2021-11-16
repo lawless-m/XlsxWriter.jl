@@ -7,7 +7,6 @@
 # Original code
 # Copyright 2013-2016, John McNamara, jmcnamara@cpan.org
 #
-include("../XlsxWriter.jl")
 
 using XlsxWriter
 

@@ -13,8 +13,10 @@ const xlsxwriter = PyNULL()
 
 function __init__() 
 	if haskey(ENV, "XLSXWRITER_PATH")
-		pushfirst!(PyVector(pyimport("sys")["path"]), ENV["XLSXWRITER_PATH"])
-		copy!(xlsxwriter, pyimport("xlsxwriter"))
+		if xlsxwriter == PyNULL()
+			pushfirst!(PyVector(pyimport("sys")["path"]), ENV["XLSXWRITER_PATH"])
+			copy!(xlsxwriter, pyimport("xlsxwriter"))
+		end
 	else
 		throw("Need to set ENV[\"XLSXWRITER_PATH\"] to the path where the xlsxwriter folder can be found. For me that is: raw\"C:\\Users\\matt\\repos\\XlsxWriter.py\\\" and reload or call XlsxWriter.__init__() ")
 	end
@@ -76,7 +78,7 @@ export Url, Workbook, Worksheet, Format, Chart, Chartsheet, Data, manual, auto_e
 #####
 
 
-pyfmt(fmt) = fmt == nothing ? nothing : fmt.py
+pyfmt(fmt) = fmt === nothing ? nothing : fmt.py
 
 function colNtocolA(n::Int64)
 	a = string(Char(mod(n, 26) + 65))
@@ -310,7 +312,7 @@ filter_column!(ws::Worksheet, col::AbstractString, criteria::Array{AbstractStrin
 set_selection!(ws::Worksheet, first_row::Int64, first_col::Int64, last_row::Int64, last_col::Int64) = ws.py[:set_selection](first_row, first_col, last_row, last_col)
 set_selection!(ws::Worksheet, cells::AbstractString) = ws.py[:set_selection](cells)
 
-set_default_row!(ws::Worksheet, height::Float64=15; hide_unused_rows::Bool=false) = ws.py[:set_default_row](height, hide_unused_rows)
+set_default_row!(ws::Worksheet, height::Float64=15.; hide_unused_rows::Bool=false) = ws.py[:set_default_row](height, hide_unused_rows)
 
 outline_settings!(ws::Worksheet, visible::Bool=true, symbols_below::Bool=true, symbols_right::Bool=true, auto_style::Bool=false) = ws.py[:outline_settings](visible, symbols_below, symbols_right, auto_style)
 
